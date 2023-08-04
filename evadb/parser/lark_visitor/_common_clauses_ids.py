@@ -24,9 +24,8 @@ class CommonClauses:
         table_name = self.visit(tree.children[0])
         if table_name is not None:
             return TableInfo(table_name=table_name)
-        else:
-            error = "Invalid Table Name"
-            logger.error(error)
+        error = "Invalid Table Name"
+        logger.error(error)
 
     def full_id(self, tree):
         return self.visit(tree.children[0])
@@ -46,22 +45,15 @@ class CommonClauses:
 
     def dotted_id(self, tree):
         dotted_id = str(tree.children[0])
-        dotted_id = dotted_id.lstrip(".")
-        return dotted_id
+        return dotted_id.lstrip(".")
 
     def simple_id(self, tree):
-        simple_id = str(tree.children[0])
-        return simple_id
+        return str(tree.children[0])
 
     def decimal_literal(self, tree):
         decimal = None
         token = tree.children[0]
-        if str.upper(token) == "ANYDIM":
-            decimal = Dimension.ANYDIM
-        else:
-            decimal = int(str(token))
-        return decimal
+        return Dimension.ANYDIM if str.upper(token) == "ANYDIM" else int(str(token))
 
     def real_literal(self, tree):
-        real_literal = float(tree.children[0])
-        return real_literal
+        return float(tree.children[0])

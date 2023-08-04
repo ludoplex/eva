@@ -53,10 +53,9 @@ class UdfCostCatalogService(BaseService):
             cost(int)  : cost of the udf
         """
         try:
-            udf_obj = self.session.execute(
+            if udf_obj := self.session.execute(
                 select(self.model).filter(self.model._udf_id == udf_id)
-            ).scalar_one_or_none()
-            if udf_obj:
+            ).scalar_one_or_none():
                 udf_obj.update(self.session, cost=new_cost)
             else:
                 self.insert_entry(udf_id, name, new_cost)
@@ -74,10 +73,9 @@ class UdfCostCatalogService(BaseService):
         """
 
         try:
-            udf_obj = self.session.execute(
+            if udf_obj := self.session.execute(
                 select(self.model).filter(self.model._udf_name == name)
-            ).scalar_one_or_none()
-            if udf_obj:
+            ).scalar_one_or_none():
                 return udf_obj.as_dataclass()
             return None
         except Exception as e:

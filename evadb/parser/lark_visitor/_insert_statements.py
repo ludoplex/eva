@@ -42,8 +42,7 @@ class Insert:
                     # Support only (value1, value2, .... value n)
                     value_list = insrt_value[0]
 
-        insert_stmt = InsertTableStatement(table_ref, column_list, value_list)
-        return insert_stmt
+        return InsertTableStatement(table_ref, column_list, value_list)
 
     def uid_list(self, tree):
         uid_expr_list = []

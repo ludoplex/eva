@@ -33,9 +33,8 @@ if sys.version_info >= (3, 8):
 
         def setUp(self) -> None:
             print("setUp")
-            f = open(suffix_pytest_xdist_worker_id_to_dir("upload.txt"), "w")
-            f.write("dummy data")
-            f.close()
+            with open(suffix_pytest_xdist_worker_id_to_dir("upload.txt"), "w") as f:
+                f.write("dummy data")
             return super().setUp()
 
         def tearDown(self) -> None:

@@ -48,17 +48,14 @@ class LoadCSVExecutor(AbstractExecutor):
             logger.error(error)
             raise ExecutorError(error)
 
-        # Get the column information
-        column_list = []
-        for column in table_obj.columns:
-            column_list.append(
-                TupleValueExpression(
-                    col_name=column.name,
-                    table_alias=table_obj.name.lower(),
-                    col_object=column,
-                )
+        column_list = [
+            TupleValueExpression(
+                col_name=column.name,
+                table_alias=table_obj.name.lower(),
+                col_object=column,
             )
-
+            for column in table_obj.columns
+        ]
         # Read the CSV file
         # converters is a dictionary of functions that convert the values
         # in the column to the desired type
@@ -75,8 +72,7 @@ class LoadCSVExecutor(AbstractExecutor):
             storage_engine.write(table_obj, batch)
             num_loaded_frames += len(batch)
 
-        # yield result
-        df_yield_result = Batch(
+        yield Batch(
             pd.DataFrame(
                 {
                     "CSV": str(self.node.file_path),
@@ -85,5 +81,3 @@ class LoadCSVExecutor(AbstractExecutor):
                 index=[0],
             )
         )
-
-        yield df_yield_result

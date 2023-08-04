@@ -22,5 +22,4 @@ class DummyExecutor:
         self.batch_list = batch_list
 
     def exec(self):
-        for batch in self.batch_list:
-            yield batch
+        yield from self.batch_list

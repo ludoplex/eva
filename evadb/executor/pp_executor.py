@@ -39,9 +39,5 @@ class PPExecutor(AbstractExecutor):
         child_executor = self.children[0]
         for batch in child_executor.exec():
             outcomes = self.predicate.evaluate(batch)
-            required_frame_ids = []
-            for i, outcome in enumerate(outcomes):
-                if outcome:
-                    required_frame_ids.append(i)
-
+            required_frame_ids = [i for i, outcome in enumerate(outcomes) if outcome]
             yield batch[required_frame_ids]

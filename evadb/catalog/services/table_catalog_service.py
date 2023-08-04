@@ -93,12 +93,12 @@ class TableCatalogService(BaseService):
         Returns:
             TableCatalogEntry - catalog entry for given table_name
         """
-        entry = self.session.execute(
+        if entry := self.session.execute(
             select(self.model).filter(self.model._name == table_name)
-        ).scalar_one_or_none()
-        if entry:
+        ).scalar_one_or_none():
             return entry if return_alchemy else entry.as_dataclass()
-        return entry
+        else:
+            return entry
 
     def delete_entry(self, table: TableCatalogEntry):
         """Delete table from the db
@@ -120,14 +120,11 @@ class TableCatalogService(BaseService):
 
     def rename_entry(self, table: TableCatalogEntry, new_name: str):
         try:
-            table_obj = self.session.execute(
+            if table_obj := self.session.execute(
                 select(self.model).filter(self.model._row_id == table.row_id)
-            ).scalar_one_or_none()
-            if table_obj:
+            ).scalar_one_or_none():
                 table_obj.update(self.session, _name=new_name)
         except Exception as e:
-            err_msg = "Update table name failed for {} with error {}".format(
-                table.name, str(e)
-            )
+            err_msg = f"Update table name failed for {table.name} with error {str(e)}"
             logger.error(err_msg)
             raise RuntimeError(err_msg)

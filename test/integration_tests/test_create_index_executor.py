@@ -31,8 +31,10 @@ from evadb.storage.storage_engine import StorageEngine
 class CreateIndexTest(unittest.TestCase):
     def _index_save_path(self):
         return str(
-            Path(self.evadb.config.get_value("storage", "index_dir"))
-            / Path("{}_{}.index".format("FAISS", "testCreateIndexName"))
+            (
+                Path(self.evadb.config.get_value("storage", "index_dir"))
+                / Path('FAISS_testCreateIndexName.index')
+            )
         )
 
     @classmethod

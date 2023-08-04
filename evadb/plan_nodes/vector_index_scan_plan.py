@@ -61,12 +61,7 @@ class VectorIndexScanPlan(AbstractPlan):
         return self._search_query_expr
 
     def __str__(self):
-        return "VectorIndexScan(index_name={}, vector_store_type={}, limit_count={}, search_query_expr={})".format(
-            self._index_name,
-            self.vector_store_type,
-            self._limit_count,
-            self._search_query_expr,
-        )
+        return f"VectorIndexScan(index_name={self._index_name}, vector_store_type={self.vector_store_type}, limit_count={self._limit_count}, search_query_expr={self._search_query_expr})"
 
     def __hash__(self) -> int:
         return hash(

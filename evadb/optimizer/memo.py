@@ -28,8 +28,8 @@ class Memo:
 
     def __init__(self):
         # map from hash to group_expr to speed up finding duplicates
-        self._group_exprs: Dict[int, GroupExpression] = dict()
-        self._groups = dict()
+        self._group_exprs: Dict[int, GroupExpression] = {}
+        self._groups = {}
 
     @property
     def groups(self):
@@ -40,10 +40,7 @@ class Memo:
         return self._group_exprs
 
     def find_duplicate_expr(self, expr: GroupExpression) -> GroupExpression:
-        if hash(expr) in self.group_exprs:
-            return self.group_exprs[hash(expr)]
-        else:
-            return None
+        return self.group_exprs[hash(expr)] if hash(expr) in self.group_exprs else None
 
     def get_group_by_id(self, group_id: int) -> GroupExpression:
         if group_id in self._groups.keys():
@@ -64,10 +61,10 @@ class Memo:
         for child_grp_id in expr.children:
             child_grp = self._groups[child_grp_id]
             aliases.extend(child_grp.aliases)
-        if (
-            expr.opr.opr_type == OperatorType.LOGICALGET
-            or expr.opr.opr_type == OperatorType.LOGICALQUERYDERIVEDGET
-        ):
+        if expr.opr.opr_type in [
+            OperatorType.LOGICALGET,
+            OperatorType.LOGICALQUERYDERIVEDGET,
+        ]:
             aliases.append(expr.opr.alias)
         elif expr.opr.opr_type == OperatorType.LOGICALFUNCTIONSCAN:
             aliases.append(expr.opr.alias)

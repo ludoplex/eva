@@ -24,15 +24,12 @@ from evadb.parser.types import ParserOrderBySortType
 ##################################################################
 class Select:
     def simple_select(self, tree):
-        select_stmt = self.visit_children(tree)
-        return select_stmt
+        return self.visit_children(tree)
 
     def order_by_clause(self, tree):
-        orderby_clause_data = []
-        for child in tree.children:
-            if isinstance(child, Tree):
-                orderby_clause_data.append(self.visit(child))
-        return orderby_clause_data
+        return [
+            self.visit(child) for child in tree.children if isinstance(child, Tree)
+        ]
 
     def order_by_expression(self, tree):
         expr = None
@@ -59,5 +56,4 @@ class Select:
         return sort_order
 
     def limit_clause(self, tree):
-        output = ConstantValueExpression(self.visit(tree.children[1]))
-        return output
+        return ConstantValueExpression(self.visit(tree.children[1]))

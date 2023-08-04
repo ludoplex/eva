@@ -25,26 +25,25 @@ class CreateExecutor(AbstractExecutor):
         super().__init__(db, node)
 
     def exec(self, *args, **kwargs):
-        if not handle_if_not_exists(
+        if handle_if_not_exists(
             self.catalog(), self.node.table_info, self.node.if_not_exists
         ):
-            logger.debug(f"Creating table {self.node.table_info}")
+            return
+        logger.debug(f"Creating table {self.node.table_info}")
 
-            catalog_entry = self.catalog().create_and_insert_table_catalog_entry(
-                self.node.table_info, self.node.column_list
-            )
-            storage_engine = StorageEngine.factory(self.db, catalog_entry)
-            storage_engine.create(table=catalog_entry)
+        catalog_entry = self.catalog().create_and_insert_table_catalog_entry(
+            self.node.table_info, self.node.column_list
+        )
+        storage_engine = StorageEngine.factory(self.db, catalog_entry)
+        storage_engine.create(table=catalog_entry)
 
-            if self.children != []:
-                assert (
-                    len(self.children) == 1
-                ), "Create materialized view expects 1 child, finds {}".format(
-                    len(self.children)
-                )
-                child = self.children[0]
+        if self.children != []:
+            assert (
+                len(self.children) == 1
+            ), f"Create materialized view expects 1 child, finds {len(self.children)}"
+            child = self.children[0]
 
-                # Populate the table
-                for batch in child.exec():
-                    batch.drop_column_alias()
-                    storage_engine.write(catalog_entry, batch)
+            # Populate the table
+            for batch in child.exec():
+                batch.drop_column_alias()
+                storage_engine.write(catalog_entry, batch)

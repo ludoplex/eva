@@ -161,13 +161,10 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
             outcome (pd.DataFrame): Emotion Predictions for input frames
         """
 
-        # result dataframe
-        outcome = []
-
         # convert to 3 channels, ten crop and stack
         frames = frames.repeat(3, 1, 1)
         frames = transforms.functional.ten_crop(frames, self.cut_size)
-        frames = torch.stack([crop for crop in frames])
+        frames = torch.stack(list(frames))
 
         # perform predictions and take mean over crops
         predictions = self.model(frames)
@@ -177,12 +174,10 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
         score = F.softmax(predictions, dim=0)
         _, predicted = torch.max(predictions.data, 0)
 
-        # save results
-        outcome.append(
+        outcome = [
             {
                 "labels": self.labels[predicted.item()],
                 "scores": score.cpu().detach().numpy()[predicted.item()],
             }
-        )
-
+        ]
         return pd.DataFrame(outcome, columns=["labels", "scores"])

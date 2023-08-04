@@ -65,11 +65,11 @@ class ConstantValueExpression(AbstractExpression):
 
     def __str__(self) -> str:
         expr_str = ""
-        if not isinstance(self._value, np.ndarray):
-            expr_str = f"{str(self._value)}"
-        else:
-            expr_str = f"{np.array_str(self._value)}"
-        return expr_str
+        return (
+            f"{str(self._value)}"
+            if not isinstance(self._value, np.ndarray)
+            else f"{np.array_str(self._value)}"
+        )
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.v_type, str(self.value)))

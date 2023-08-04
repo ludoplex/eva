@@ -79,14 +79,13 @@ def handle_if_not_exists(
         table_info.table_name,
         table_info.database_name,
     ):
-        err_msg = "Table: {} already exists".format(table_info)
+        err_msg = f"Table: {table_info} already exists"
         if if_not_exist:
             logger.warn(err_msg)
             return True
         else:
             logger.error(err_msg)
             raise ExecutorError(err_msg)
-    # Table does not exist
     else:
         return False
 
@@ -109,9 +108,7 @@ def iter_path_regex(path_regex: Path) -> Generator[str, None, None]:
 def validate_video(video_path: Path) -> bool:
     try:
         vid = cv2.VideoCapture(str(video_path))
-        if not vid.isOpened():
-            return False
-        return True
+        return bool(vid.isOpened())
     except Exception as e:
         logger.warning(
             f"Unexpected Exception {e} occurred while reading video file {video_path}"
@@ -160,4 +157,4 @@ def handle_vector_store_params(
     elif vector_store_type == VectorStoreType.QDRANT:
         return {"index_db": str(Path(index_path).parent)}
     else:
-        raise ValueError("Unsupported vector store type: {}".format(vector_store_type))
+        raise ValueError(f"Unsupported vector store type: {vector_store_type}")

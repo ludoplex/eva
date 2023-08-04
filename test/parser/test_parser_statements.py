@@ -140,14 +140,12 @@ class ParserStatementTests(unittest.TestCase):
                 Impl 'evadb/udfs/face_detector.py';
             """,
         ]
-        queries = queries + randomized_cases
+        queries += randomized_cases
         ref_stmt = parser.parse(queries[0])[0]
         self.assertNotEqual(ref_stmt, None)
         self.assertNotEqual(ref_stmt.__str__(), None)
 
-        statement_to_query_dict = {}
-        statement_to_query_dict[ref_stmt] = queries[0]
-
+        statement_to_query_dict = {ref_stmt: queries[0]}
         for other_query in queries[1:]:
             stmt = parser.parse(other_query)[0]
 

@@ -141,15 +141,13 @@ class CatalogManager(object):
             ColumnCatalogEntry(name=IDENTIFIER_COLUMN, type=ColumnType.INTEGER)
         ] + column_list
 
-        table_entry = self._table_catalog_service.insert_entry(
+        return self._table_catalog_service.insert_entry(
             name,
             file_url,
             identifier_column=identifier_column,
             table_type=table_type,
             column_list=column_list,
         )
-
-        return table_entry
 
     def get_table_catalog_entry(
         self, table_name: str, database_name: str = None
@@ -163,11 +161,9 @@ class CatalogManager(object):
             TableCatalogEntry
         """
 
-        table_entry = self._table_catalog_service.get_entry_by_name(
+        return self._table_catalog_service.get_entry_by_name(
             database_name, table_name
         )
-
-        return table_entry
 
     def delete_table_catalog_entry(self, table_entry: TableCatalogEntry) -> bool:
         """
@@ -191,10 +187,7 @@ class CatalogManager(object):
         table_entry = self._table_catalog_service.get_entry_by_name(
             database_name, table_name
         )
-        if table_entry is None:
-            return False
-        else:
-            return True
+        return table_entry is not None
 
     def get_all_table_catalog_entries(self):
         return self._table_catalog_service.get_all_entries()
@@ -204,25 +197,22 @@ class CatalogManager(object):
     def get_column_catalog_entry(
         self, table_obj: TableCatalogEntry, col_name: str
     ) -> ColumnCatalogEntry:
-        col_obj = self._column_service.filter_entry_by_table_id_and_name(
+        if col_obj := self._column_service.filter_entry_by_table_id_and_name(
             table_obj.row_id, col_name
-        )
-        if col_obj:
+        ):
             return col_obj
-        else:
-            # return a dummy column catalog entry for audio, even though it does not defined for videos
-            if col_name == VideoColumnName.audio:
-                return ColumnCatalogEntry(
-                    col_name,
-                    ColumnType.NDARRAY,
-                    table_id=table_obj.row_id,
-                    table_name=table_obj.name,
-                )
-            return None
+        # return a dummy column catalog entry for audio, even though it does not defined for videos
+        if col_name == VideoColumnName.audio:
+            return ColumnCatalogEntry(
+                col_name,
+                ColumnType.NDARRAY,
+                table_id=table_obj.row_id,
+                table_name=table_obj.name,
+            )
+        return None
 
     def get_column_catalog_entries_by_table(self, table_obj: TableCatalogEntry):
-        col_entries = self._column_service.filter_entries_by_table(table_obj)
-        return col_entries
+        return self._column_service.filter_entries_by_table(table_obj)
 
     "udf catalog services"
 
@@ -319,10 +309,9 @@ class CatalogManager(object):
         feat_column: ColumnCatalogEntry,
         udf_signature: str,
     ) -> IndexCatalogEntry:
-        index_catalog_entry = self._index_service.insert_entry(
+        return self._index_service.insert_entry(
             name, save_file_path, vector_store_type, feat_column, udf_signature
         )
-        return index_catalog_entry
 
     def get_index_catalog_entry_by_name(self, name: str) -> IndexCatalogEntry:
         return self._index_service.get_entry_by_name(name)
@@ -370,10 +359,8 @@ class CatalogManager(object):
         Returns:
             UdfMetadataCatalogEntry objects
         """
-        udf_entry = self.get_udf_catalog_entry_by_name(udf_name)
-        if udf_entry:
-            entries = self._udf_metadata_service.get_entries_by_udf_id(udf_entry.row_id)
-            return entries
+        if udf_entry := self.get_udf_catalog_entry_by_name(udf_name):
+            return self._udf_metadata_service.get_entries_by_udf_id(udf_entry.row_id)
         else:
             return []
 
@@ -402,14 +389,13 @@ class CatalogManager(object):
 
         dataset_location = self._config.get_value("core", "datasets_dir")
         file_url = str(generate_file_path(dataset_location, table_name))
-        table_catalog_entry = self.insert_table_catalog_entry(
+        return self.insert_table_catalog_entry(
             table_name,
             file_url,
             column_catalog_entries,
             identifier_column=identifier_column,
             table_type=table_type,
         )
-        return table_catalog_entry
 
     def create_and_insert_multimedia_table_catalog_entry(
         self, name: str, format_type: FileFormatType

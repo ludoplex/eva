@@ -55,9 +55,7 @@ class TableInfo:
         self._table_obj = obj
 
     def __str__(self):
-        table_info_str = self._table_name
-
-        return table_info_str
+        return self._table_name
 
     def __eq__(self, other):
         if not isinstance(other, TableInfo):
@@ -105,11 +103,9 @@ class JoinNode:
 
     def __str__(self) -> str:
         if self.predicate is not None:
-            return "{} {} {} ON {}".format(
-                self.left, self.join_type, self.right, self.predicate
-            )
+            return f"{self.left} {self.join_type} {self.right} ON {self.predicate}"
         else:
-            return "{} {} {}".format(self.left, self.join_type, self.right)
+            return f"{self.left} {self.join_type} {self.right}"
 
     def __hash__(self) -> int:
         return hash((self.join_type, self.left, self.right, self.predicate))
@@ -129,9 +125,7 @@ class TableValuedExpression:
         return self._do_unnest
 
     def __str__(self) -> str:
-        if self.do_unnest:
-            return f"unnest({self._func_expr})"
-        return f"{self._func_expr}"
+        return f"unnest({self._func_expr})" if self.do_unnest else f"{self._func_expr}"
 
     def __eq__(self, other):
         if not isinstance(other, TableValuedExpression):

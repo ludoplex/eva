@@ -56,10 +56,7 @@ def is_video_table(table: TableCatalogEntry):
 
 
 def is_document_table(table: TableCatalogEntry):
-    return (
-        table.table_type == TableType.DOCUMENT_DATA
-        or table.table_type == TableType.PDF_DATA
-    )
+    return table.table_type in [TableType.DOCUMENT_DATA, TableType.PDF_DATA]
 
 
 def is_string_col(col: ColumnCatalogEntry):
@@ -73,7 +70,7 @@ def get_video_table_column_definitions() -> List[ColumnDefinition]:
     data: frame data
     audio: frame audio
     """
-    columns = [
+    return [
         ColumnDefinition(
             VideoColumnName.name.name,
             ColumnType.TEXT,
@@ -81,16 +78,19 @@ def get_video_table_column_definitions() -> List[ColumnDefinition]:
             None,
             ColConstraintInfo(unique=True),
         ),
-        ColumnDefinition(VideoColumnName.id.name, ColumnType.INTEGER, None, None),
+        ColumnDefinition(
+            VideoColumnName.id.name, ColumnType.INTEGER, None, None
+        ),
         ColumnDefinition(
             VideoColumnName.data.name,
             ColumnType.NDARRAY,
             NdArrayType.UINT8,
             (None, None, None),
         ),
-        ColumnDefinition(VideoColumnName.seconds.name, ColumnType.FLOAT, None, []),
+        ColumnDefinition(
+            VideoColumnName.seconds.name, ColumnType.FLOAT, None, []
+        ),
     ]
-    return columns
 
 
 def get_image_table_column_definitions() -> List[ColumnDefinition]:
@@ -98,7 +98,7 @@ def get_image_table_column_definitions() -> List[ColumnDefinition]:
     name: image path
     data: image decoded data
     """
-    columns = [
+    return [
         ColumnDefinition(
             ImageColumnName.name.name,
             ColumnType.TEXT,
@@ -113,7 +113,6 @@ def get_image_table_column_definitions() -> List[ColumnDefinition]:
             (None, None, None),
         ),
     ]
-    return columns
 
 
 def get_document_table_column_definitions() -> List[ColumnDefinition]:
@@ -121,7 +120,7 @@ def get_document_table_column_definitions() -> List[ColumnDefinition]:
     name: file path
     data: file extracted data
     """
-    columns = [
+    return [
         ColumnDefinition(
             DocumentColumnName.name.name,
             ColumnType.TEXT,
@@ -136,7 +135,6 @@ def get_document_table_column_definitions() -> List[ColumnDefinition]:
             None,
         ),
     ]
-    return columns
 
 
 def get_pdf_table_column_definitions() -> List[ColumnDefinition]:
@@ -146,10 +144,14 @@ def get_pdf_table_column_definitions() -> List[ColumnDefinition]:
     paragraph: paragraph no
     data: pdf paragraph data
     """
-    columns = [
+    return [
         ColumnDefinition(PDFColumnName.name.name, ColumnType.TEXT, None, None),
-        ColumnDefinition(PDFColumnName.page.name, ColumnType.INTEGER, None, None),
-        ColumnDefinition(PDFColumnName.paragraph.name, ColumnType.INTEGER, None, None),
+        ColumnDefinition(
+            PDFColumnName.page.name, ColumnType.INTEGER, None, None
+        ),
+        ColumnDefinition(
+            PDFColumnName.paragraph.name, ColumnType.INTEGER, None, None
+        ),
         ColumnDefinition(
             PDFColumnName.data.name,
             ColumnType.TEXT,
@@ -157,7 +159,6 @@ def get_pdf_table_column_definitions() -> List[ColumnDefinition]:
             None,
         ),
     ]
-    return columns
 
 
 def get_table_primary_columns(table_catalog_obj: TableCatalogEntry):
@@ -211,19 +212,20 @@ def construct_udf_cache_catalog_entry(
     Returns:
         UdfCacheCatalogEntry: the udf cache catalog entry
     """
-    udf_depends = []
-    col_depends = []
-    for expr in func_expr.find_all(FunctionExpression):
-        udf_depends.append(expr.udf_obj.row_id)
-    for expr in func_expr.find_all(TupleValueExpression):
-        col_depends.append(expr.col_object.row_id)
+    udf_depends = [
+        expr.udf_obj.row_id for expr in func_expr.find_all(FunctionExpression)
+    ]
+    col_depends = [
+        expr.col_object.row_id
+        for expr in func_expr.find_all(TupleValueExpression)
+    ]
     cache_name = func_expr.signature()
 
     # add salt to the cache_name so that we generate unique name
     path = str(get_str_hash(cache_name + uuid.uuid4().hex))
     cache_path = str(Path(cache_dir) / Path(f"{path}_{func_expr.name}"))
-    args = tuple([arg.signature() for arg in func_expr.children])
-    entry = UdfCacheCatalogEntry(
+    args = tuple(arg.signature() for arg in func_expr.children)
+    return UdfCacheCatalogEntry(
         name=func_expr.signature(),
         udf_id=func_expr.udf_obj.row_id,
         cache_path=cache_path,
@@ -231,8 +233,6 @@ def construct_udf_cache_catalog_entry(
         udf_depends=udf_depends,
         col_depends=col_depends,
     )
-
-    return entry
 
 
 def cleanup_storage(config):
@@ -257,10 +257,14 @@ def get_metadata_entry_or_val(
     Returns:
         str: metadata value
     """
-    for metadata in udf_obj.metadata:
-        if metadata.key == key:
-            return metadata.value
-    return default_val
+    return next(
+        (
+            metadata.value
+            for metadata in udf_obj.metadata
+            if metadata.key == key
+        ),
+        default_val,
+    )
 
 
 def get_metadata_properties(udf_obj: UdfCatalogEntry) -> Dict:
@@ -273,10 +277,7 @@ def get_metadata_properties(udf_obj: UdfCatalogEntry) -> Dict:
     Returns:
         Dict: key-value for each metadata entry
     """
-    properties = {}
-    for metadata in udf_obj.metadata:
-        properties[metadata.key] = metadata.value
-    return properties
+    return {metadata.key: metadata.value for metadata in udf_obj.metadata}
 
 
 #### get catalog instance

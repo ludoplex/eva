@@ -40,7 +40,7 @@ class FaceDetector(AbstractClassifierUDF, GPUCompatible):
         return "FaceDetector"
 
     def to_device(self, device: str):
-        gpu = "cuda:{}".format(device)
+        gpu = f"cuda:{device}"
         self.model = MTCNN(device=torch.device(gpu))
         return self
 
@@ -67,11 +67,11 @@ class FaceDetector(AbstractClassifierUDF, GPUCompatible):
             pred_boxes = []
             pred_scores = []
             if frame_boxes is not None and frame_scores is not None:
-                if not np.isnan(pred_boxes):
+                if np.isnan(pred_boxes):
+                    logger.warn(f"Nan entry in box {frame_boxes}")
+                else:
                     pred_boxes = np.asarray(frame_boxes, dtype="int")
                     pred_scores = frame_scores
-                else:
-                    logger.warn(f"Nan entry in box {frame_boxes}")
             outcome.append(
                 {"bboxes": pred_boxes, "scores": pred_scores},
             )

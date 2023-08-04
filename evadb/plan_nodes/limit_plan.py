@@ -37,7 +37,7 @@ class LimitPlan(AbstractPlan):
         return self._limit_count.value
 
     def __str__(self):
-        return "LimitPlan(limit_count={})".format(self._limit_count)
+        return f"LimitPlan(limit_count={self._limit_count})"
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self._limit_count))

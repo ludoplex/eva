@@ -91,18 +91,13 @@ class AbstractExpressionsTest(unittest.TestCase):
         expr = LogicalExpression(ExpressionType.LOGICAL_AND, cmpr_exp1, cmpr_exp2)
 
         self.assertEqual(
-            [cmpr_exp1, cmpr_exp2],
-            [exp for exp in list(expr.find_all(ComparisonExpression))],
+            [cmpr_exp1, cmpr_exp2], list(list(expr.find_all(ComparisonExpression)))
         )
         self.assertNotEqual(
-            [cmpr_exp2, cmpr_exp1],
-            [exp for exp in list(expr.find_all(ComparisonExpression))],
+            [cmpr_exp2, cmpr_exp1], list(list(expr.find_all(ComparisonExpression)))
         )
 
-        self.assertNotEqual(
-            [None],
-            [exp for exp in list(expr.find_all(TupleValueExpression))],
-        )
+        self.assertNotEqual([None], list(list(expr.find_all(TupleValueExpression))))
 
     def test_not_implemented_functions(self):
         with self.assertRaises(TypeError):

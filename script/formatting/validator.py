@@ -85,12 +85,7 @@ def contains_commented_out_code(line):
             return True
 
     # Handle return statements in a specific way
-    if 'return' in line:
-        if len(line.split(' ')) >= 2:
-            return False
-        else:
-            return True
-    return False
+    return len(line.split(' ')) < 2 if 'return' in line else False
 
 
 def validate_file(file):
@@ -98,36 +93,37 @@ def validate_file(file):
     file = os.path.abspath(file)
 
     if not os.path.isfile(file):
-        LOG.info("ERROR: " + file + " isn't a file")
+        LOG.info(f"ERROR: {file} isn't a file")
         sys.exit(EXIT_FAILURE)
 
     if not file.endswith('.py'):
         return True
 
-    code_validation = True
     line_number = 1
     commented_code = False
 
+    code_validation = True
     with open(file, 'r') as opened_file:
         for line in opened_file:
 
             # Check if the line has commented code
             if line.lstrip().startswith('#'):
-                commented_code = contains_commented_out_code(line)
-
-                if commented_code:
-                    LOG.info("Commented code "
-                             + "in file " + file
-                             + " Line {}: {}".format(line_number, line.strip()))
+                if commented_code := contains_commented_out_code(line):
+                    LOG.info(
+                        "Commented code "
+                        + "in file "
+                        + file
+                        + f" Line {line_number}: {line.strip()}"
+                    )
 
             # Search for a pattern, and report hits
             for validator_pattern in VALIDATOR_PATTERNS:
                 if validator_pattern.search(line):
                     code_validation = False
-                    LOG.info("Unacceptable pattern:"
-                             + validator_pattern.pattern.strip()
-                             + " in file " + file
-                             + " Line {}: {}".format(line_number, line.strip()))
+                    LOG.info(
+                        f"Unacceptable pattern:{validator_pattern.pattern.strip()} in file {file}"
+                        + f" Line {line_number}: {line.strip()}"
+                    )
 
             line_number += 1
 
@@ -168,7 +164,7 @@ if __name__ == '__main__':
             status = validate_file(each_file)
 
             if not status:
-                LOG.info("WARNING: Code Validation fails for file:" + each_file)
+                LOG.info(f"WARNING: Code Validation fails for file:{each_file}")
 
     else:
         # Scanning entire source directory

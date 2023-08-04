@@ -92,15 +92,13 @@ class VectorIndexScanExecutor(AbstractExecutor):
             column_list = batch.columns
             if not row_id_col_name:
                 row_id_alias = get_row_id_column_alias(column_list)
-                row_id_col_name = "{}.{}".format(row_id_alias, IDENTIFIER_COLUMN)
+                row_id_col_name = f"{row_id_alias}.{IDENTIFIER_COLUMN}"
 
             # Nested join.
             for _, row in batch.frames.iterrows():
                 for idx, rid in enumerate(row_id_np):
                     if rid == row[row_id_col_name]:
-                        res_row = dict()
-                        for col_name in column_list:
-                            res_row[col_name] = row[col_name]
+                        res_row = {col_name: row[col_name] for col_name in column_list}
                         res_row_list[idx] = res_row
 
         yield Batch(pd.DataFrame(res_row_list))

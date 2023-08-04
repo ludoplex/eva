@@ -53,8 +53,10 @@ class CreateIndexExecutor(AbstractExecutor):
         if not index_dir.exists():
             index_dir.mkdir(parents=True, exist_ok=True)
         return str(
-            index_dir
-            / Path("{}_{}.index".format(self.node.vector_store_type, self.node.name))
+            (
+                index_dir
+                / Path(f"{self.node.vector_store_type}_{self.node.name}.index")
+            )
         )
 
     def _create_index(self):

@@ -65,7 +65,7 @@ def conjunction_list_to_expression_tree(
     Example:
         conjunction_list_to_expression_tree([a, b, c] ): AND( AND(a, b), c)
     """
-    if len(expression_list) == 0:
+    if not expression_list:
         return None
     prev_expr = expression_list[0]
     for expr in expression_list[1:]:
@@ -135,8 +135,7 @@ def extract_range_list_from_comparison_expr(
     if expr_type == ExpressionType.COMPARE_EQUAL:
         valid_ranges.append((val, val))
     elif expr_type == ExpressionType.COMPARE_NEQ:
-        valid_ranges.append((lower_bound, val - 1))
-        valid_ranges.append((val + 1, upper_bound))
+        valid_ranges.extend(((lower_bound, val - 1), (val + 1, upper_bound)))
     elif expr_type == ExpressionType.COMPARE_GREATER:
         valid_ranges.append((val + 1, upper_bound))
     elif expr_type == ExpressionType.COMPARE_GEQ:
@@ -236,7 +235,7 @@ def get_columns_in_predicate(predicate: AbstractExpression) -> Set[str]:
         Set[str]: list of column aliases used in the predicate
     """
     if isinstance(predicate, TupleValueExpression):
-        return set([predicate.col_alias])
+        return {predicate.col_alias}
     cols = set()
     for child in predicate.children:
         child_cols = get_columns_in_predicate(child)

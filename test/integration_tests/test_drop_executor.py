@@ -97,7 +97,7 @@ class DropUDFExecutorTest(unittest.TestCase):
         self.assertTrue(udf is not None)
 
         # Test that dropping the UDF reflects in the catalog
-        drop_query = "DROP UDF IF EXISTS {};".format(udf_name)
+        drop_query = f"DROP UDF IF EXISTS {udf_name};"
         execute_query_fetch_all(self.evadb, drop_query)
         udf = self.evadb.catalog().get_udf_catalog_entry_by_name(udf_name)
         self.assertTrue(udf is None)
@@ -112,13 +112,11 @@ class DropUDFExecutorTest(unittest.TestCase):
         # Test that dropping the wrong UDF:
         # - does not affect UDFs in the catalog
         # - raises an appropriate exception
-        drop_query = "DROP UDF {};".format(wrong_udf_name)
+        drop_query = f"DROP UDF {wrong_udf_name};"
         try:
             execute_query_fetch_all(self.evadb, drop_query)
         except Exception as e:
-            err_msg = "UDF {} does not exist, therefore cannot be dropped.".format(
-                wrong_udf_name
-            )
+            err_msg = f"UDF {wrong_udf_name} does not exist, therefore cannot be dropped."
             self.assertTrue(str(e) == err_msg)
         udf = self.evadb.catalog().get_udf_catalog_entry_by_name(right_udf_name)
         self.assertTrue(udf is not None)

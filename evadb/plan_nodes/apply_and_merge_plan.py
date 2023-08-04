@@ -50,7 +50,7 @@ class ApplyAndMergePlan(AbstractPlan):
 
     def __str__(self):
         plan = "UnnestApplyAndMergePlan" if self._do_unnest else "ApplyAndMergePlan"
-        return "{}(func_expr={})".format(plan, self._func_expr)
+        return f"{plan}(func_expr={self._func_expr})"
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.func_expr, self.alias, self.do_unnest))

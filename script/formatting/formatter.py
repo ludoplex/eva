@@ -58,10 +58,7 @@ FORMATTING_DIR = os.path.join(EVA_SCRIPT_DIR, "formatting")
 PYLINTRC = os.path.join(FORMATTING_DIR, "pylintrc")
 
 # DEFAULT DIRS
-DEFAULT_DIRS = []
-DEFAULT_DIRS.append(EVA_SRC_DIR)
-DEFAULT_DIRS.append(EVA_TEST_DIR)
-
+DEFAULT_DIRS = [EVA_SRC_DIR, EVA_TEST_DIR]
 IGNORE_FILES = ["version.py"]
 
 FLAKE8_VERSION_REQUIRED = "3.9.1"
@@ -162,10 +159,7 @@ def check_header(file_path):
         if header_match is None:
             return False
         header_comment = header_match.group(1)
-        if header_comment == header:
-            return True
-        else:
-            return False
+        return header_comment == header
 
 
 def format_file(file_path, add_header, strip_header, format_code):
@@ -179,7 +173,7 @@ def format_file(file_path, add_header, strip_header, format_code):
     with open(abs_path, "r+") as fd:
         file_data = fd.read()
         if add_header:
-            LOG.info("Adding header: " + file_path)
+            LOG.info(f"Adding header: {file_path}")
             new_file_data = header + file_data
 
             fd.seek(0, 0)
@@ -187,7 +181,7 @@ def format_file(file_path, add_header, strip_header, format_code):
             fd.write(new_file_data)
 
         elif strip_header:
-            LOG.info("Stripping headers : " + file_path)
+            LOG.info(f"Stripping headers : {file_path}")
             header_match = header_regex.match(file_data)
             if header_match is None:
                 return
@@ -212,16 +206,15 @@ def format_file(file_path, add_header, strip_header, format_code):
 
             # AUTOFLAKE
             autoflake_command = f"{FLAKE_BINARY} --config='{FLAKE8_CONFIG}' {file_path}"
-            ret_val = os.system(autoflake_command)
-            if ret_val:
+            if ret_val := os.system(autoflake_command):
                 sys.exit(1)
 
             # PYLINT
             pylint_command = f"{PYLINT_BINARY} --spelling-private-dict-file {ignored_words_file} --rcfile={PYLINTRC}  {file_path}"
-            #LOG.warning(pylint_command)
-            #ret_val = os.system(pylint_command)
-            #if ret_val:
-            #    sys.exit(1)
+                    #LOG.warning(pylint_command)
+                    #ret_val = os.system(pylint_command)
+                    #if ret_val:
+                    #    sys.exit(1)
 
     # END WITH
 
@@ -256,7 +249,7 @@ def check_notebook_format(notebook_file):
         if cell.cell_type == 'code' and not cell.source.strip():
             LOG.error(f"ERROR: Notebook {notebook_file} contains an empty code cell")
             sys.exit(1)
-    
+
     # Check for "print(response)"
     # too harsh replaxing it
     # for cell in nb.cells:
@@ -279,23 +272,6 @@ def check_notebook_format(notebook_file):
         sys.exit(1)
 
     return True
-
-    # SKIP SPELL CHECK BY DEFAULT DUE TO PACKAGE DEPENDENCY
-    # Need to install enchant-2 and aspell packages
-    # apt-get install enchant-2 aspell
-
-    import enchant
-    from enchant.checker import SpellChecker
-    chkr = SpellChecker("en_US")
-
-    # Check spelling
-    for cell in nb.cells:
-        if cell.cell_type == "code":
-            continue  # Skip code cells
-        chkr.set_text(cell.source)
-        for err in chkr:
-            if err.word not in ignored_words:
-                LOG.warning(f"WARNING: Notebook {notebook_file} contains the misspelled word: {err.word}")
 
 
 # format all the files in the dir passed as argument

@@ -105,9 +105,7 @@ class PlanGenerator:
         optimizer_context.task_stack.push(OptimizeGroup(root_group, optimizer_context))
         self.execute_task_stack(optimizer_context.task_stack)
 
-        # Build Optimal Tree
-        optimal_plan = self.build_optimal_physical_plan(root_grp_id, optimizer_context)
-        return optimal_plan
+        return self.build_optimal_physical_plan(root_grp_id, optimizer_context)
 
     async def build(self, logical_plan: Operator):
         # apply optimizations

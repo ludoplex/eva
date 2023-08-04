@@ -56,8 +56,7 @@ def execute_statement(evadb: EVADatabase, statement: AbstractStatement) -> Batch
     StatementBinder(StatementBinderContext(evadb.catalog)).bind(statement)
     l_plan = StatementToPlanConverter().visit(statement)
     p_plan = asyncio.run(PlanGenerator(evadb).build(l_plan))
-    output = PlanExecutor(evadb, p_plan).execute_plan()
-    if output:
+    if output := PlanExecutor(evadb, p_plan).execute_plan():
         batch_list = list(output)
         return Batch.concat(batch_list, copy=False)
 
@@ -120,13 +119,10 @@ def handle_select_clause(
     if clause == "target_list" and getattr(query, clause) == create_star_expression():
         setattr(query, clause, None)
 
-    if getattr(query, clause) is None:
-        setattr(query, clause, value)
-    else:
+    if getattr(query, clause) is not None:
         query = SelectStatement(
             target_list=create_star_expression(),
             from_table=TableRef(query, alias=alias),
         )
-        setattr(query, clause, value)
-
+    setattr(query, clause, value)
     return query

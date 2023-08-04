@@ -58,8 +58,6 @@ class CostModel:
 
         @cost.register(ApplyAndMergePlan)
         def cost_apply_and_merge(opr: ApplyAndMergePlan):
-            if opr.func_expr.has_cache():
-                return 0
-            return 1
+            return 0 if opr.func_expr.has_cache() else 1
 
         return cost(gexpr.opr)

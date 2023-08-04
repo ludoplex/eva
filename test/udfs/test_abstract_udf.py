@@ -40,9 +40,9 @@ class AbstractUDFTest(unittest.TestCase):
                 params = sig.parameters
                 len_params = len(params)
                 if "kwargs" in params:
-                    len_params = len_params - 1
+                    len_params -= 1
                 if "args" in params:
-                    len_params = len_params - 1
+                    len_params -= 1
                 # Construct dummy object of given type
                 dummy_object = get_mock_object(class_type, len_params)
                 self.assertTrue(str(dummy_object.name) is not None)
@@ -89,9 +89,9 @@ class AbstractUDFTest(unittest.TestCase):
             params = sig.parameters
             len_params = len(params)
             if "kwargs" in params:
-                len_params = len_params - 1
+                len_params -= 1
             if "args" in params:
-                len_params = len_params - 1
+                len_params -= 1
             try:
                 dummy_object = get_mock_object(class_type, len_params)
             except Exception:

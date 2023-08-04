@@ -107,6 +107,4 @@ class ChatGPT(AbstractUDF):
             response = openai.ChatCompletion.create(**params)
             results.append(response.choices[0].message.content)
 
-        df = pd.DataFrame({"response": results})
-
-        return df
+        return pd.DataFrame({"response": results})

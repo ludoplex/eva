@@ -107,8 +107,7 @@ class PlanNodeTests(unittest.TestCase):
         table_info = "info"
         file_path = "test.mp4"
         file_format = FileFormatType.VIDEO
-        file_options = {}
-        file_options["file_format"] = file_format
+        file_options = {"file_format": file_format}
         column_list = None
         batch_mem_size = 3000
         plan_str = "LoadDataPlan(table_id={}, file_path={}, \
@@ -146,7 +145,6 @@ class PlanNodeTests(unittest.TestCase):
         for derived_plan_class in derived_plan_classes:
             sig = signature(derived_plan_class.__init__)
             params = sig.parameters
-            plan_dict = {}
             if isabstract(derived_plan_class) is False:
                 obj = get_mock_object(derived_plan_class, len(params))
-                plan_dict[obj] = obj
+                plan_dict = {obj: obj}

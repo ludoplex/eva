@@ -89,7 +89,7 @@ class NdArrayType(EVAEnum):
         elif t == cls.ANYTYPE:
             np_type = np.dtype(object)
         else:
-            raise ValueError("Can not auto convert %s to numpy type" % t)
+            raise ValueError(f"Can not auto convert {t} to numpy type")
 
         return np_type
 
@@ -110,10 +110,7 @@ class VideoColumnName(EVAEnum):
         if isinstance(other, str):
             return self.name == other
 
-        if isinstance(other, EVAEnum):
-            return self.value == other.value
-
-        return False
+        return self.value == other.value if isinstance(other, EVAEnum) else False
 
 
 class ImageColumnName(EVAEnum):

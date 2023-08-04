@@ -130,7 +130,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
             yield Batch(
                 pd.DataFrame(
                     [
-                        f"Number of loaded {self.media_type.name}: {str(len(valid_files))}"
+                        f"Number of loaded {self.media_type.name}: {len(valid_files)}"
                     ]
                 )
             )
@@ -149,6 +149,4 @@ class LoadMultimediaExecutor(AbstractExecutor):
         file_path: Path,
     ):
         file_path = Path(file_path)
-        if validate_media(file_path, self.media_type):
-            return True
-        return False
+        return bool(validate_media(file_path, self.media_type))

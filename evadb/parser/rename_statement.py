@@ -33,10 +33,7 @@ class RenameTableStatement(AbstractStatement):
         self._new_table_name = new_table_name
 
     def __str__(self) -> str:
-        print_str = "RENAME TABLE {} TO {} ".format(
-            self._old_table_ref, self._new_table_name
-        )
-        return print_str
+        return f"RENAME TABLE {self._old_table_ref} TO {self._new_table_name} "
 
     @property
     def old_table_ref(self):

@@ -322,11 +322,7 @@ class SelectExecutorTest(unittest.TestCase):
         # groupby and orderby together not tested because groupby
         # only applies to video data which is already sorted
         segment_size = 3
-        select_query = (
-            "SELECT FIRST(id), SEGMENT(data) FROM MyVideo GROUP BY '{} frames';".format(
-                segment_size
-            )
-        )
+        select_query = f"SELECT FIRST(id), SEGMENT(data) FROM MyVideo GROUP BY '{segment_size} frames';"
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
         actual_batch.sort()
         ids = np.arange(NUM_FRAMES)
@@ -347,11 +343,7 @@ class SelectExecutorTest(unittest.TestCase):
         # groupby and orderby together not tested because groupby
         # only applies to video data which is already sorted
         segment_size = 3
-        select_query = (
-            "SELECT LAST(id), SEGMENT(data) FROM MyVideo GROUP BY '{}frames';".format(
-                segment_size
-            )
-        )
+        select_query = f"SELECT LAST(id), SEGMENT(data) FROM MyVideo GROUP BY '{segment_size}frames';"
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
         actual_batch.sort()
         ids = np.arange(NUM_FRAMES)
@@ -372,28 +364,22 @@ class SelectExecutorTest(unittest.TestCase):
 
     def test_select_and_groupby_should_fail_with_incorrect_pattern(self):
         segment_size = "4a"
-        select_query = (
-            "SELECT FIRST(id), SEGMENT(data) FROM MyVideo GROUP BY '{} frames';".format(
-                segment_size
-            )
-        )
+        select_query = f"SELECT FIRST(id), SEGMENT(data) FROM MyVideo GROUP BY '{segment_size} frames';"
         self.assertRaises(
             BinderError, execute_query_fetch_all, self.evadb, select_query
         )
 
     def test_select_and_groupby_should_fail_with_seconds(self):
         segment_size = 4
-        select_query = "SELECT FIRST(id), SEGMENT(data) FROM MyVideo GROUP BY '{} seconds';".format(
-            segment_size
-        )
+        select_query = f"SELECT FIRST(id), SEGMENT(data) FROM MyVideo GROUP BY '{segment_size} seconds';"
         self.assertRaises(
             BinderError, execute_query_fetch_all, self.evadb, select_query
         )
 
     def test_select_and_groupby_should_fail_with_non_video_table(self):
         segment_size = 4
-        select_query = "SELECT FIRST(a1) FROM table1 GROUP BY '{} frames';".format(
-            segment_size
+        select_query = (
+            f"SELECT FIRST(a1) FROM table1 GROUP BY '{segment_size} frames';"
         )
         self.assertRaises(
             BinderError, execute_query_fetch_all, self.evadb, select_query
@@ -404,9 +390,7 @@ class SelectExecutorTest(unittest.TestCase):
         # only applies to video data which is already sorted
         segment_size = 2
         sampling_rate = 2
-        select_query = "SELECT FIRST(id), SEGMENT(data) FROM MyVideo SAMPLE {} GROUP BY '{} frames';".format(
-            sampling_rate, segment_size
-        )
+        select_query = f"SELECT FIRST(id), SEGMENT(data) FROM MyVideo SAMPLE {sampling_rate} GROUP BY '{segment_size} frames';"
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
         actual_batch.sort()
         ids = np.arange(0, NUM_FRAMES, sampling_rate)

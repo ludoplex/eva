@@ -47,8 +47,12 @@ class Binder:
             if len(pattern.children) != len(expr.children):
                 return
 
-            for child_grp, pattern_child in zip(expr.children, pattern.children):
-                child_binders.append(Binder._grp_binder(child_grp, pattern_child, memo))
+            child_binders.extend(
+                Binder._grp_binder(child_grp, pattern_child, memo)
+                for child_grp, pattern_child in zip(
+                    expr.children, pattern.children
+                )
+            )
         else:
             # record the group id in a Dummy Operator
             curr_iterator = iter([Dummy(expr.group_id, expr.opr)])
@@ -78,5 +82,4 @@ class Binder:
     def __iter__(self):
         # the iterator only returns one match, which stems from the root node
         for match in Binder._binder(self._grp_expr, self._pattern, self._memo):
-            x = Binder.build_opr_tree_from_pre_order_repr(match)
-            yield x
+            yield Binder.build_opr_tree_from_pre_order_repr(match)

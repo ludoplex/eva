@@ -147,9 +147,7 @@ class UdfIOCatalogEntry:
     def display_format(self):
         data_type = self.type.name
         if self.type == ColumnType.NDARRAY:
-            data_type = "{} {} {}".format(
-                data_type, self.array_type.name, self.array_dimensions
-            )
+            data_type = f"{data_type} {self.array_type.name} {self.array_dimensions}"
 
         return {"name": self.name, "data_type": data_type}
 

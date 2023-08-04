@@ -39,13 +39,7 @@ class CreateIndexStatement(AbstractStatement):
         self._udf_func = udf_func
 
     def __str__(self) -> str:
-        print_str = "CREATE INDEX {} ON {} ({}{}) ".format(
-            self._name,
-            self._table_ref,
-            "" if self._udf_func else self._udf_func,
-            tuple(self._col_list),
-        )
-        return print_str
+        return f'CREATE INDEX {self._name} ON {self._table_ref} ({"" if self._udf_func else self._udf_func}{tuple(self._col_list)}) '
 
     @property
     def name(self):

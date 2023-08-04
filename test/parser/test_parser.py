@@ -130,9 +130,7 @@ class ParserTests(unittest.TestCase):
 
         select_query = """SELECT id, Yolo(frame).labels FROM MyVideo
                         WHERE id<5; """
-        explain_query = "EXPLAIN CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels) AS {}".format(
-            select_query
-        )
+        explain_query = f"EXPLAIN CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels) AS {select_query}"
 
         eva_statement_list = parser.parse(explain_query)
 
@@ -153,16 +151,14 @@ class ParserTests(unittest.TestCase):
     def test_create_table_statement(self):
         parser = Parser()
 
-        single_queries = []
-        single_queries.append(
+        single_queries = [
             """CREATE TABLE IF NOT EXISTS Persons (
                   Frame_ID INTEGER UNIQUE,
                   Frame_Data TEXT(10),
                   Frame_Value FLOAT(1000, 201),
                   Frame_Array NDARRAY UINT8(5, 100, 2432, 4324, 100)
             );"""
-        )
-
+        ]
         expected_cci = ColConstraintInfo()
         expected_cci.nullable = True
         unique_cci = ColConstraintInfo()
@@ -280,22 +276,13 @@ class ParserTests(unittest.TestCase):
     def test_single_statement_queries(self):
         parser = Parser()
 
-        single_queries = []
-        single_queries.append("SELECT CLASS FROM TAIPAI;")
-        single_queries.append("SELECT CLASS FROM TAIPAI WHERE CLASS = 'VAN';")
-        single_queries.append(
-            "SELECT CLASS,REDNESS FROM TAIPAI \
-            WHERE CLASS = 'VAN' AND REDNESS > 20.5;"
-        )
-        single_queries.append(
-            "SELECT CLASS FROM TAIPAI \
-            WHERE (CLASS = 'VAN' AND REDNESS < 300 ) OR REDNESS > 500;"
-        )
-        single_queries.append(
-            "SELECT CLASS FROM TAIPAI \
-            WHERE (CLASS = 'VAN' AND REDNESS < 300 ) OR REDNESS > 500;"
-        )
-
+        single_queries = [
+            "SELECT CLASS FROM TAIPAI;",
+            "SELECT CLASS FROM TAIPAI WHERE CLASS = 'VAN';",
+            "SELECT CLASS,REDNESS FROM TAIPAI \\n        #            WHERE CLASS = 'VAN' AND REDNESS > 20.5;",
+            "SELECT CLASS FROM TAIPAI \\n        #            WHERE (CLASS = 'VAN' AND REDNESS < 300 ) OR REDNESS > 500;",
+            "SELECT CLASS FROM TAIPAI \\n        #            WHERE (CLASS = 'VAN' AND REDNESS < 300 ) OR REDNESS > 500;",
+        ]
         for query in single_queries:
             eva_statement_list = parser.parse(query)
 
@@ -306,14 +293,9 @@ class ParserTests(unittest.TestCase):
     def test_multiple_statement_queries(self):
         parser = Parser()
 
-        multiple_queries = []
-        multiple_queries.append(
-            "SELECT CLASS FROM TAIPAI \
-                WHERE (CLASS != 'VAN' AND REDNESS < 300)  OR REDNESS > 500; \
-                SELECT REDNESS FROM TAIPAI \
-                WHERE (CLASS = 'VAN' AND REDNESS = 300)"
-        )
-
+        multiple_queries = [
+            "SELECT CLASS FROM TAIPAI \\n        #                WHERE (CLASS != 'VAN' AND REDNESS < 300)  OR REDNESS > 500; \\n        #                SELECT REDNESS FROM TAIPAI \\n        #                WHERE (CLASS = 'VAN' AND REDNESS = 300)"
+        ]
         for query in multiple_queries:
             eva_statement_list = parser.parse(query)
             self.assertIsInstance(eva_statement_list, list)
@@ -641,8 +623,7 @@ class ParserTests(unittest.TestCase):
         parser = Parser()
         load_data_query = """LOAD VIDEO 'data/video.mp4'
                              INTO MyVideo"""
-        file_options = {}
-        file_options["file_format"] = FileFormatType.VIDEO
+        file_options = {"file_format": FileFormatType.VIDEO}
         column_list = None
         expected_stmt = LoadDataStatement(
             TableInfo("MyVideo"),
@@ -663,8 +644,7 @@ class ParserTests(unittest.TestCase):
         load_data_query = """LOAD CSV 'data/meta.csv'
                              INTO
                              MyMeta (id, frame_id, video_id, label);"""
-        file_options = {}
-        file_options["file_format"] = FileFormatType.CSV
+        file_options = {"file_format": FileFormatType.CSV}
         expected_stmt = LoadDataStatement(
             TableInfo("MyMeta"),
             Path("data/meta.csv"),
@@ -687,7 +667,7 @@ class ParserTests(unittest.TestCase):
     def test_nested_select_statement(self):
         parser = Parser()
         sub_query = """SELECT CLASS FROM TAIPAI WHERE CLASS = 'VAN'"""
-        nested_query = """SELECT ID FROM ({}) AS T;""".format(sub_query)
+        nested_query = f"""SELECT ID FROM ({sub_query}) AS T;"""
         parsed_sub_query = parser.parse(sub_query)[0]
         actual_stmt = parser.parse(nested_query)[0]
         self.assertEqual(actual_stmt.stmt_type, StatementType.SELECT)
@@ -748,9 +728,7 @@ class ParserTests(unittest.TestCase):
     def test_materialized_view(self):
         select_query = """SELECT id, Yolo(frame).labels FROM MyVideo
                         WHERE id<5; """
-        query = "CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels) AS {}".format(
-            select_query
-        )
+        query = f"CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels) AS {select_query}"
         parser = Parser()
         mat_view_stmt = parser.parse(query)
         select_stmt = parser.parse(select_query)

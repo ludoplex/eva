@@ -69,13 +69,12 @@ class TopDownRewrite(OptimizerTask):
         super().__init__(optimizer_context, OptimizerTaskType.TOP_DOWN_REWRITE)
 
     def execute(self):
-        valid_rules = []
-        for rule in self.rule_set:
-            if not self.root_expr.is_rule_explored(rule.rule_type) and rule.top_match(
-                self.root_expr.opr
-            ):
-                valid_rules.append(rule)
-
+        valid_rules = [
+            rule
+            for rule in self.rule_set
+            if not self.root_expr.is_rule_explored(rule.rule_type)
+            and rule.top_match(self.root_expr.opr)
+        ]
         # sort the rules by promise
         valid_rules = sorted(valid_rules, key=lambda x: x.promise())
         for rule in valid_rules:
@@ -133,13 +132,12 @@ class BottomUpRewrite(OptimizerTask):
                     BottomUpRewrite(child_expr, self.rule_set, self.optimizer_context)
                 )
             return
-        valid_rules = []
-        for rule in self.rule_set:
-            if not self.root_expr.is_rule_explored(rule.rule_type) and rule.top_match(
-                self.root_expr.opr
-            ):
-                valid_rules.append(rule)
-
+        valid_rules = [
+            rule
+            for rule in self.rule_set
+            if not self.root_expr.is_rule_explored(rule.rule_type)
+            and rule.top_match(self.root_expr.opr)
+        ]
         # sort the rules by promise
         sorted(valid_rules, key=lambda x: x.promise())
         for rule in valid_rules:
@@ -147,9 +145,7 @@ class BottomUpRewrite(OptimizerTask):
             for match in iter(binder):
                 if not rule.check(match, self.optimizer_context):
                     continue
-                logger.info(
-                    "In BottomUp, Rule {} matched for {}".format(rule, self.root_expr)
-                )
+                logger.info(f"In BottomUp, Rule {rule} matched for {self.root_expr}")
                 after = rule.apply(match, self.optimizer_context)
                 plans = list(after)
                 assert (
@@ -159,7 +155,7 @@ class BottomUpRewrite(OptimizerTask):
                     new_expr = self.optimizer_context.replace_expression(
                         plan, self.root_expr.group_id
                     )
-                    logger.info("After rewriting {}".format(self.root_expr))
+                    logger.info(f"After rewriting {self.root_expr}")
                     self.optimizer_context.task_stack.push(
                         BottomUpRewrite(new_expr, self.rule_set, self.optimizer_context)
                     )
@@ -190,11 +186,7 @@ class OptimizeExpression(OptimizerTask):
             # rule list.
             rules = rules_manager.logical_rules + rules_manager.implementation_rules
 
-        valid_rules = []
-        for rule in rules:
-            if rule.top_match(self.root_expr.opr):
-                valid_rules.append(rule)
-
+        valid_rules = [rule for rule in rules if rule.top_match(self.root_expr.opr)]
         valid_rules = sorted(valid_rules, key=lambda x: x.promise())
 
         for rule in valid_rules:

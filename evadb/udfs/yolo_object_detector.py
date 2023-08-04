@@ -80,7 +80,7 @@ class Yolo(AbstractUDF, GPUCompatible):
         outcome = []
         # Fix me: this should be taken care by decorators
         frames = np.ravel(frames.to_numpy())
-        list_of_numpy_images = [its for its in frames]
+        list_of_numpy_images = list(frames)
         predictions = self.model.predict(
             list_of_numpy_images, device=self.device, conf=self.threshold, verbose=False
         )

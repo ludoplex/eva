@@ -50,7 +50,4 @@ class LarkParser(object):
         output = LarkInterpreter(query_string).visit(tree)
 
         # convert output to list if it is a single element
-        if isinstance(output, list):
-            return output
-        else:
-            return [output]
+        return output if isinstance(output, list) else [output]

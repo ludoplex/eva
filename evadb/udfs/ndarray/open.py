@@ -22,7 +22,7 @@ from evadb.udfs.abstract.abstract_udf import AbstractUDF
 class Open(AbstractUDF):
     def setup(self):
         # cache data to avoid expensive open files on disk
-        self._data_cache = dict()
+        self._data_cache = {}
 
     @property
     def name(self):

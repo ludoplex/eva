@@ -40,8 +40,7 @@ async def read_line(stdin_reader: StreamReader) -> str:
         if input_char == b";":
             break
         input_buffer.append(input_char)
-    message = b"".join(input_buffer).decode()
-    return message
+    return b"".join(input_buffer).decode()
 
 
 async def create_stdin_reader() -> StreamReader:
@@ -72,7 +71,7 @@ async def read_from_client_and_send_to_server(
         sys.stdout.write(prompt)
         sys.stdout.flush()
         query = await read_line(stdin_reader)
-        logger.debug("Query: --|" + query + "|--")
+        logger.debug(f"Query: --|{query}|--")
 
         query = query.lstrip()
         query = query.rstrip()

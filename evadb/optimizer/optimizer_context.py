@@ -89,8 +89,7 @@ class OptimizerContext:
         # support  exposing only the content
         opr_copy = copy.copy(opr)
         opr_copy.clear_children()
-        expr = GroupExpression(opr=opr_copy, children=child_ids)
-        return expr
+        return GroupExpression(opr=opr_copy, children=child_ids)
 
     def replace_expression(self, opr: Operator, group_id: int):
         """

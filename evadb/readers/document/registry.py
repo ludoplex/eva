@@ -31,7 +31,7 @@ def _lazy_import_loader():
     except ImportError:
         raise ImportError(import_err_msg)
 
-    LOADER_MAPPING = {
+    return {
         ".doc": (UnstructuredWordDocumentLoader, {}),
         ".docx": (UnstructuredWordDocumentLoader, {}),
         ".enex": (EverNoteLoader, {}),
@@ -45,7 +45,6 @@ def _lazy_import_loader():
         ".txt": (TextLoader, {"encoding": "utf8"}),
         # Add more mappings for other file extensions and loaders as needed
     }
-    return LOADER_MAPPING
 
 
 SUPPORTED_TYPES = [

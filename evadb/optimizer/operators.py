@@ -97,11 +97,7 @@ class Operator:
         self.children = []
 
     def __str__(self) -> str:
-        return "%s[%s](%s)" % (
-            type(self).__name__,
-            hex(id(self)),
-            ", ".join("%s=%s" % item for item in vars(self).items()),
-        )
+        return f'{type(self).__name__}[{hex(id(self))}]({", ".join("%s=%s" % item for item in vars(self).items())})'
 
     def __eq__(self, other):
         is_subtree_equal = True
@@ -1115,9 +1111,7 @@ class LogicalExchange(Operator):
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
-        if not isinstance(other, LogicalExchange):
-            return False
-        return is_subtree_equal
+        return False if not isinstance(other, LogicalExchange) else is_subtree_equal
 
 
 class LogicalExplain(Operator):

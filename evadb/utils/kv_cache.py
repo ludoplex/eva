@@ -42,8 +42,7 @@ class DiskKVCache:
         self._cache = FanoutCache(path, shards=shards, **default_settings)
 
     def get(self, key: Any):
-        value = self._cache.get(key, default=None)
-        return value
+        return self._cache.get(key, default=None)
 
     def set(self, key: Any, value: Any):
         self._cache.set(key, value)

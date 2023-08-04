@@ -74,9 +74,7 @@ def bind_table_info(
     if obj:
         table_info.table_obj = obj
     else:
-        error = "{} does not exist. Create the table using" " CREATE TABLE.".format(
-            table_info.table_name
-        )
+        error = f"{table_info.table_name} does not exist. Create the table using CREATE TABLE."
         logger.error(error)
         raise BinderError(error)
 
@@ -86,13 +84,10 @@ def extend_star(
 ) -> List[TupleValueExpression]:
     col_objs = binder_context._get_all_alias_and_col_name()
 
-    target_list = list(
-        [
-            TupleValueExpression(col_name=col_name, table_alias=alias)
-            for alias, col_name in col_objs
-        ]
-    )
-    return target_list
+    return [
+        TupleValueExpression(col_name=col_name, table_alias=alias)
+        for alias, col_name in col_objs
+    ]
 
 
 def check_groupby_pattern(table_ref: TableRef, groupby_string: str) -> None:
@@ -100,9 +95,9 @@ def check_groupby_pattern(table_ref: TableRef, groupby_string: str) -> None:
     pattern = re.search(r"^\d+\s*(?:frames|samples|paragraphs)$", groupby_string)
     # if valid pattern
     if not pattern:
-        err_msg = "Incorrect GROUP BY pattern: {}".format(groupby_string)
+        err_msg = f"Incorrect GROUP BY pattern: {groupby_string}"
         raise BinderError(err_msg)
-    match_string = pattern.group(0)
+    match_string = pattern[0]
     suffix_string = re.sub(r"^\d+\s*", "", match_string)
 
     if suffix_string not in ["frames", "samples", "paragraphs"]:
@@ -145,15 +140,14 @@ def resolve_alias_table_value_expression(node: FunctionExpression):
     default_output_col_aliases = [str(obj.name.lower()) for obj in node.output_objs]
     if not node.alias:
         node.alias = Alias(default_alias_name, default_output_col_aliases)
-    else:
-        if not len(node.alias.col_names):
-            node.alias = Alias(node.alias.alias_name, default_output_col_aliases)
-        else:
-            output_aliases = [
-                str(col_name.lower()) for col_name in node.alias.col_names
-            ]
-            node.alias = Alias(node.alias.alias_name, output_aliases)
+    elif len(node.alias.col_names):
+        output_aliases = [
+            str(col_name.lower()) for col_name in node.alias.col_names
+        ]
+        node.alias = Alias(node.alias.alias_name, output_aliases)
 
+    else:
+        node.alias = Alias(node.alias.alias_name, default_output_col_aliases)
     assert len(node.alias.col_names) == len(
         node.output_objs
     ), f"""Expected {len(node.output_objs)} output columns for {node.alias.alias_name}, got {len(node.alias.col_names)}."""
@@ -207,7 +201,7 @@ def handle_bind_extract_object_function(
     binder_context.bind(tracker)
     # append the bound output of detector
     for obj in detector.output_objs:
-        col_alias = "{}.{}".format(obj.udf_name.lower(), obj.name.lower())
+        col_alias = f"{obj.udf_name.lower()}.{obj.name.lower()}"
         child = TupleValueExpression(
             obj.name,
             table_alias=obj.udf_name.lower(),

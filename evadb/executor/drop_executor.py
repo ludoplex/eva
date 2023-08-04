@@ -40,13 +40,12 @@ class DropExecutor(AbstractExecutor):
         if not self.catalog().check_table_exists(
             table_info.table_name, table_info.database_name
         ):
-            err_msg = "Table: {} does not exist".format(table_info)
-            if self.node.if_exists:
-                logger.warning(err_msg)
-                return Batch(pd.DataFrame([err_msg]))
-            else:
+            err_msg = f"Table: {table_info} does not exist"
+            if not self.node.if_exists:
                 raise ExecutorError(err_msg)
 
+            logger.warning(err_msg)
+            return Batch(pd.DataFrame([err_msg]))
         table_obj = self.catalog().get_table_catalog_entry(
             table_info.table_name, table_info.database_name
         )
@@ -61,11 +60,10 @@ class DropExecutor(AbstractExecutor):
 
         assert self.catalog().delete_table_catalog_entry(
             table_obj
-        ), "Failed to drop {}".format(table_info)
+        ), f"Failed to drop {table_info}"
 
         yield Batch(
             pd.DataFrame(
-                {"Table Successfully dropped: {}".format(table_info.table_name)},
-                index=[0],
+                {f"Table Successfully dropped: {table_info.table_name}"}, index=[0]
             )
         )

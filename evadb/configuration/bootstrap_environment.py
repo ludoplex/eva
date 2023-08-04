@@ -37,13 +37,11 @@ def get_base_config(eva_installation_dir: Path) -> Path:
     Get path to .evadb.yml source path.
     This file will be copied to user's .eva directory.
     """
-    # if eva package is installed into environment
-    if importlib_resources.is_resource("evadb", EVA_CONFIG_FILE):
-        with importlib_resources.path("evadb", EVA_CONFIG_FILE) as yml_path:
-            return yml_path
-    else:
+    if not importlib_resources.is_resource("evadb", EVA_CONFIG_FILE):
         # For local dev environments without package installed
         return eva_installation_dir / EVA_CONFIG_FILE
+    with importlib_resources.path("evadb", EVA_CONFIG_FILE) as yml_path:
+        return yml_path
 
 
 def get_default_db_uri(eva_db_dir: Path):
@@ -108,9 +106,7 @@ def create_directories_and_get_default_config_values(
     if not udf_dir.exists():
         udf_dir.mkdir(parents=True, exist_ok=True)
 
-    config_obj = {}
-    config_obj["core"] = {}
-    config_obj["storage"] = {}
+    config_obj = {"core": {}, "storage": {}}
     config_obj["core"]["eva_installation_dir"] = str(default_install_dir.resolve())
     config_obj["core"]["datasets_dir"] = str(dataset_location.resolve())
     config_obj["core"]["catalog_database_uri"] = get_default_db_uri(eva_db_dir)
@@ -119,10 +115,11 @@ def create_directories_and_get_default_config_values(
     config_obj["storage"]["s3_download_dir"] = str(s3_dir.resolve())
     config_obj["storage"]["tmp_dir"] = str(tmp_dir.resolve())
     config_obj["storage"]["udf_dir"] = str(udf_dir.resolve())
-    if category and key:
-        return config_obj.get(category, {}).get(key, None)
-    elif category:
-        return config_obj.get(category, {})
+    if category:
+        if key:
+            return config_obj.get(category, {}).get(key, None)
+        else:
+            return config_obj.get(category, {})
     return config_obj
 
 

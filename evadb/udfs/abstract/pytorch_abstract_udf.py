@@ -68,14 +68,13 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
             self.get_device()
         )
 
-        if gpu_batch_size:
-            chunks = torch.split(tens_batch, gpu_batch_size)
-            outcome = pd.DataFrame()
-            for tensor in chunks:
-                outcome = pd.concat([outcome, self.forward(tensor)], ignore_index=True)
-            return outcome
-        else:
+        if not gpu_batch_size:
             return self.forward(frames)
+        chunks = torch.split(tens_batch, gpu_batch_size)
+        outcome = pd.DataFrame()
+        for tensor in chunks:
+            outcome = pd.concat([outcome, self.forward(tensor)], ignore_index=True)
+        return outcome
 
     def as_numpy(self, val: Tensor) -> np.ndarray:
         """
@@ -91,7 +90,7 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
         """
         Required to make class a member of GPUCompatible Protocol.
         """
-        return self.to(torch.device("cuda:{}".format(device)))
+        return self.to(torch.device(f"cuda:{device}"))
 
 
 class PytorchAbstractTransformationUDF(AbstractTransformationUDF, Compose):
@@ -106,7 +105,7 @@ class PytorchAbstractTransformationUDF(AbstractTransformationUDF, Compose):
         return Compose.__call__(self, frames)
 
     def __call__(self, *args, **kwargs):
-        if len(args) == 0:
+        if not args:
             return nn.Module.__call__(self, *args, **kwargs)
 
         frames = args[0]

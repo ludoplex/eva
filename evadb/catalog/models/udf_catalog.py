@@ -68,10 +68,7 @@ class UdfCatalog(BaseModel):
             else:
                 outputs.append(attribute.as_dataclass())
 
-        metadata = []
-        for meta_key_value in self._metadata:
-            metadata.append(meta_key_value.as_dataclass())
-
+        metadata = [meta_key_value.as_dataclass() for meta_key_value in self._metadata]
         return UdfCatalogEntry(
             row_id=self._row_id,
             name=self._name,

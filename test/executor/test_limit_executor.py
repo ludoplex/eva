@@ -46,10 +46,7 @@ class LimitExecutorTest(unittest.TestCase):
         limit_executor.append_child(DummyExecutor(batches))
         reduced_batches = list(limit_executor.exec())
 
-        total_size = 0
-        for batch in reduced_batches:
-            total_size += len(batch)
-
+        total_size = sum(len(batch) for batch in reduced_batches)
         self.assertEqual(total_size, limit_value)
 
     def test_should_return_limit_greater_than_size(self):
@@ -64,10 +61,7 @@ class LimitExecutorTest(unittest.TestCase):
 
         batches = [Batch(frames=df) for df in dfs]
 
-        previous_total_size = 0
-        for batch in batches:
-            previous_total_size += len(batch)
-
+        previous_total_size = sum(len(batch) for batch in batches)
         limit_value = 500
 
         plan = LimitPlan(ConstantValueExpression(limit_value))
@@ -76,10 +70,7 @@ class LimitExecutorTest(unittest.TestCase):
         limit_executor.append_child(DummyExecutor(batches))
         reduced_batches = list(limit_executor.exec())
 
-        after_total_size = 0
-        for batch in reduced_batches:
-            after_total_size += len(batch)
-
+        after_total_size = sum(len(batch) for batch in reduced_batches)
         self.assertEqual(previous_total_size, after_total_size)
 
     def test_should_return_top_frames_after_sorting(self):

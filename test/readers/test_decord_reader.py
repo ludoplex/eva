@@ -37,20 +37,22 @@ from evadb.readers.decord_reader import DecordReader
 @pytest.mark.notparallel
 class DecordLoaderTest(unittest.TestCase):
     @classmethod
-    def setUpClass(self):
-        self.video_file_url = create_sample_video()
-        self.video_with_audio_file_url = (
+    def setUpClass(cls):
+        cls.video_file_url = create_sample_video()
+        cls.video_with_audio_file_url = (
             f"{EVA_ROOT_DIR}/data/sample_videos/touchdown.mp4"
         )
-        self.frame_size = FRAME_SIZE[0] * FRAME_SIZE[1] * 3
-        self.audio_frames = []
-        for line in open(
-            f"{EVA_ROOT_DIR}/test/data/touchdown_audio_frames.csv"
-        ).readlines():
-            self.audio_frames.append(np.fromstring(line, sep=","))
+        cls.frame_size = FRAME_SIZE[0] * FRAME_SIZE[1] * 3
+        cls.audio_frames = []
+        cls.audio_frames.extend(
+            np.fromstring(line, sep=",")
+            for line in open(
+                f"{EVA_ROOT_DIR}/test/data/touchdown_audio_frames.csv"
+            )
+        )
 
     @classmethod
-    def tearDownClass(self):
+    def tearDownClass(cls):
         file_remove("dummy.avi")
 
     def _batches_to_reader_convertor(self, batches):
@@ -70,7 +72,7 @@ class DecordLoaderTest(unittest.TestCase):
             batches = list(video_loader.read())
 
             expected = self._batches_to_reader_convertor(
-                create_dummy_batches(filters=[i for i in range(0, NUM_FRAMES, k)])
+                create_dummy_batches(filters=list(range(0, NUM_FRAMES, k)))
             )
 
             self.assertEqual(batches, expected)
@@ -91,7 +93,7 @@ class DecordLoaderTest(unittest.TestCase):
             value = NUM_FRAMES // 2
             start = value + k - (value % k) if value % k else value
             expected = self._batches_to_reader_convertor(
-                create_dummy_batches(filters=[i for i in range(start, NUM_FRAMES, k)])
+                create_dummy_batches(filters=list(range(start, NUM_FRAMES, k)))
             )
         self.assertEqual(batches, expected)
 
@@ -118,7 +120,7 @@ class DecordLoaderTest(unittest.TestCase):
             batches = list(video_loader.read())
             start = value + k - (value % k) if value % k else value
             expected = self._batches_to_reader_convertor(
-                create_dummy_batches(filters=[i for i in range(start, 8, k)])
+                create_dummy_batches(filters=list(range(start, 8, k)))
             )
         self.assertEqual(batches, expected)
 
@@ -147,7 +149,7 @@ class DecordLoaderTest(unittest.TestCase):
             )
             batches = list(video_loader.read())
             expected = self._batches_to_reader_convertor(
-                create_dummy_batches(filters=[i for i in range(0, NUM_FRAMES, k)])
+                create_dummy_batches(filters=list(range(0, NUM_FRAMES, k)))
             )
             self.assertEqual(batches, expected)
 

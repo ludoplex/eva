@@ -49,10 +49,9 @@ class CreateTable:
                 elif child.data == "simple_select":
                     query = self.visit(child)
 
-        create_stmt = CreateTableStatement(
+        return CreateTableStatement(
             table_info, if_not_exists, create_definitions, query=query
         )
-        return create_stmt
 
     def create_definitions(self, tree):
         column_definitions = []
@@ -126,25 +125,19 @@ class CreateTable:
         return ColumnConstraintEnum.NOTNULL
 
     def simple_data_type(self, tree):
-        data_type = None
         array_type = None
         dimensions = []
 
         token = tree.children[0]
-        if str.upper(token) == "BOOLEAN":
-            data_type = ColumnType.BOOLEAN
-
+        data_type = ColumnType.BOOLEAN if str.upper(token) == "BOOLEAN" else None
         return data_type, array_type, dimensions
 
     def integer_data_type(self, tree):
-        data_type = None
         array_type = None
         dimensions = []
 
         token = tree.children[0]
-        if str.upper(token) == "INTEGER":
-            data_type = ColumnType.INTEGER
-
+        data_type = ColumnType.INTEGER if str.upper(token) == "INTEGER" else None
         return data_type, array_type, dimensions
 
     def dimension_data_type(self, tree):
@@ -221,16 +214,13 @@ class CreateTable:
         return tuple(dimensions)
 
     def length_one_dimension(self, tree):
-        dimensions = self.dimension_helper(tree)
-        return dimensions
+        return self.dimension_helper(tree)
 
     def length_two_dimension(self, tree):
-        dimensions = self.dimension_helper(tree)
-        return dimensions
+        return self.dimension_helper(tree)
 
     def length_dimension_list(self, tree):
-        dimensions = self.dimension_helper(tree)
-        return dimensions
+        return self.dimension_helper(tree)
 
     # MATERIALIZED VIEW
     def create_materialized_view(self, tree):

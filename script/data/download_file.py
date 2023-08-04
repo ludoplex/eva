@@ -31,9 +31,7 @@ def download_file_from_google_drive(file_name, destination):
     session = requests.Session()
 
     response = session.get(URL, params = { 'id' : id }, stream = True)
-    token = get_confirm_token(response)
-
-    if token:
+    if token := get_confirm_token(response):
         params = { 'id' : id, 'confirm' : token }
         response = session.get(URL, params = params, stream = True)
 
@@ -46,11 +44,14 @@ def get_confirm_token(response):
         response: response object from the request
     """
 
-    for key, value in response.cookies.items():
-        if key.startswith('download_warning'):
-            return value
-
-    return None
+    return next(
+        (
+            value
+            for key, value in response.cookies.items()
+            if key.startswith('download_warning')
+        ),
+        None,
+    )
 
 def save_response_content(response, destination):
     """
@@ -69,5 +70,5 @@ def save_response_content(response, destination):
 
 if __name__ == "__main__":
     file_name = sys.argv[1]
-    destination = os.path.join(os.getcwd(), file_name + ".zip")
+    destination = os.path.join(os.getcwd(), f"{file_name}.zip")
     download_file_from_google_drive(file_name, destination)

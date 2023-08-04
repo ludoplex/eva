@@ -87,8 +87,8 @@ class TupleValueExpression(AbstractExpression):
         Returns:
             str: signature string
         """
-        assert isinstance(self.col_object, ColumnCatalogEntry) or isinstance(
-            self.col_object, UdfIOCatalogEntry
+        assert isinstance(
+            self.col_object, (ColumnCatalogEntry, UdfIOCatalogEntry)
         ), f"Unsupported type of self.col_object {type(self.col_object)}, expected ColumnCatalogEntry or UdfIOCatalogEntry"
 
         col_name = self.col_object.name

@@ -55,8 +55,7 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
         # to just breakdown directory also as part of file name. Additionally, it does not use hashing,
         # which avoids computation overhead.
         file_path_str = str(file_url)
-        file_path = re.sub(r"[^a-zA-Z0-9 \.\n]", "_", file_path_str)
-        return file_path
+        return re.sub(r"[^a-zA-Z0-9 \.\n]", "_", file_path_str)
 
     def create(self, table: TableCatalogEntry, if_not_exists=True):
         """

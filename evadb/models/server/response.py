@@ -42,8 +42,7 @@ class Response:
 
     @classmethod
     def deserialize(cls, data):
-        obj = PickleSerializer.deserialize(data)
-        return obj
+        return PickleSerializer.deserialize(data)
 
     def as_df(self):
         if self.error is not None:

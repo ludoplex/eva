@@ -39,7 +39,7 @@ class AbstractReader(metaclass=ABCMeta):
             raise DatasetFileNotFoundError()
 
         if isinstance(file_url, Path):
-            file_url = str(file_url)
+            file_url = file_url
         self.file_url = file_url
         self.batch_mem_size = batch_mem_size
 

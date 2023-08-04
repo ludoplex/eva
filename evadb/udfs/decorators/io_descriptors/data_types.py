@@ -71,8 +71,6 @@ class PandasDataframe(IOArgument):
         self.column_shapes = column_shapes
 
     def generate_catalog_entries(self, is_input=False) -> List[Type[UdfIOCatalogEntry]]:
-        catalog_entries = []
-
         if not self.column_types:
             self.column_types = [NdArrayType.ANYTYPE] * len(self.columns)
 
@@ -87,18 +85,16 @@ class PandasDataframe(IOArgument):
                 "columns, column_types and column_shapes should be of same length if specified. "
             )
 
-        for column_name, column_type, column_shape in zip(
-            self.columns, self.column_types, self.column_shapes
-        ):
-            catalog_entries.append(
-                UdfIOCatalogEntry(
-                    name=column_name,
-                    type=ColumnType.NDARRAY,
-                    is_nullable=False,
-                    array_type=column_type,
-                    array_dimensions=column_shape,
-                    is_input=is_input,
-                )
+        return [
+            UdfIOCatalogEntry(
+                name=column_name,
+                type=ColumnType.NDARRAY,
+                is_nullable=False,
+                array_type=column_type,
+                array_dimensions=column_shape,
+                is_input=is_input,
             )
-
-        return catalog_entries
+            for column_name, column_type, column_shape in zip(
+                self.columns, self.column_types, self.column_shapes
+            )
+        ]

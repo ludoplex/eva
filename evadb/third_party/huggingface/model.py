@@ -47,8 +47,7 @@ class ImageHFModel(AbstractHFUdf):
     def input_formatter(self, inputs: Any):
         frames_list = inputs.values.tolist()
         frames = np.vstack(frames_list)
-        images = [Image.fromarray(row) for row in frames]
-        return images
+        return [Image.fromarray(row) for row in frames]
 
 
 class AudioHFModel(AbstractHFUdf):
@@ -67,7 +66,7 @@ class AudioHFModel(AbstractHFUdf):
         for file in files:
             # must read audio at 16000Hz because most models were trained at this sampling rate
             reader = decord.AudioReader(file, mono=True, sample_rate=16000)
-            audio.append(reader[0:].asnumpy()[0])
+            audio.append(reader[:].asnumpy()[0])
         return audio
 
 

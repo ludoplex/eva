@@ -23,9 +23,9 @@ def _mk_label(
     )
 
     def format_col(col):
-        colstr = "+%s" % (col.name)
+        colstr = f"+{col.name}"
         if show_datatypes:
-            colstr += " : %s" % (col.type.__class__.__name__)
+            colstr += f" : {col.type.__class__.__name__}"
         return colstr
 
     if show_attributes:
@@ -42,38 +42,43 @@ def _mk_label(
             for col in sorted(mapper.columns, key=lambda col: not col.primary_key)
         ]
     if show_operations:
-        html += '<TR><TD ALIGN="LEFT">%s</TD></TR>' % '<BR ALIGN="LEFT"/>'.join(
-            "%s(%s)"
-            % (
-                name,
-                ", ".join(
-                    default is _mk_label
-                    and ("%s") % arg
-                    or ("%s=%s" % (arg, repr(default)))
-                    for default, arg in zip(
-                        (
-                            func.func_defaults
-                            and len(func.func_code.co_varnames)
-                            - 1
-                            - (len(func.func_defaults) or 0)
-                            or func.func_code.co_argcount - 1
-                        )
-                        * [_mk_label]
-                        + list(func.func_defaults or []),
-                        func.func_code.co_varnames[1:],
+        html += (
+            '<TR><TD ALIGN="LEFT">%s</TD></TR>'
+            % '<BR ALIGN="LEFT"/>'.join(
+                (
+                    "%s(%s)"
+                    % (
+                        name,
+                        ", ".join(
+                            default is _mk_label
+                            and f"{arg}"
+                            or f"{arg}={repr(default)}"
+                            for default, arg in zip(
+                                (
+                                    func.func_defaults
+                                    and len(func.func_code.co_varnames)
+                                    - 1
+                                    - (len(func.func_defaults) or 0)
+                                    or func.func_code.co_argcount - 1
+                                )
+                                * [_mk_label]
+                                + list(func.func_defaults or []),
+                                func.func_code.co_varnames[1:],
+                            )
+                        ),
                     )
-                ),
+                )
+                for name, func in mapper.class_.__dict__.items()
+                if isinstance(func, types.FunctionType)
+                and func.__module__ == mapper.class_.__module__
             )
-            for name, func in mapper.class_.__dict__.items()
-            if isinstance(func, types.FunctionType)
-            and func.__module__ == mapper.class_.__module__
         )
     html += "</TABLE>>"
     return html
 
 
 def escape(name):
-    return '"%s"' % name
+    return f'"{name}"'
 
 
 def create_uml_graph(
@@ -120,7 +125,7 @@ def create_uml_graph(
                     escape(mapper.class_.__name__),
                     arrowhead="none",
                     arrowtail="empty",
-                    style="setlinewidth(%s)" % linewidth,
+                    style=f"setlinewidth({linewidth})",
                     arrowsize=str(linewidth),
                 )
             )
@@ -139,15 +144,10 @@ def create_uml_graph(
         def multiplicity_indicator(prop):
             if prop.uselist:
                 return " *"
-            if hasattr(prop, "local_side"):
-                cols = prop.local_side
-            else:
-                cols = prop.local_columns
+            cols = prop.local_side if hasattr(prop, "local_side") else prop.local_columns
             if any(col.nullable for col in cols):
                 return " 0..1"
-            if show_multiplicity_one:
-                return " 1"
-            return ""
+            return " 1" if show_multiplicity_one else ""
 
         if len(relation) == 2:
             src, dest = relation
@@ -155,7 +155,7 @@ def create_uml_graph(
             to_name = escape(dest.parent.class_.__name__)
 
             def calc_label(src, dest):
-                return "+" + src.key + multiplicity_indicator(src)
+                return f"+{src.key}{multiplicity_indicator(src)}"
 
             args["headlabel"] = calc_label(src, dest)
 
@@ -167,7 +167,7 @@ def create_uml_graph(
             (prop,) = relation
             from_name = escape(prop.parent.class_.__name__)
             to_name = escape(prop.mapper.class_.__name__)
-            args["headlabel"] = "+%s%s" % (prop.key, multiplicity_indicator(prop))
+            args["headlabel"] = f"+{prop.key}{multiplicity_indicator(prop)}"
             args["arrowtail"] = "none"
             args["arrowhead"] = "vee"
 
@@ -177,9 +177,9 @@ def create_uml_graph(
                 to_name,
                 fontname=font,
                 fontsize="7.0",
-                style="setlinewidth(%s)" % linewidth,
+                style=f"setlinewidth({linewidth})",
                 arrowsize=str(linewidth),
-                **args
+                **args,
             )
         )
 
@@ -207,16 +207,20 @@ def _render_table_html(
     if show_column_keys:
         if use_column_key_attr:
             # sqlalchemy > 1.0
-            fk_col_names = set(
-                [h for f in table.foreign_key_constraints for h in f.columns.keys()]
-            )
+            fk_col_names = {
+                h
+                for f in table.foreign_key_constraints
+                for h in f.columns.keys()
+            }
         else:
             # sqlalchemy pre 1.0?
-            fk_col_names = set(
-                [h.name for f in table.foreign_keys for h in f.constraint.columns]
-            )
+            fk_col_names = {
+                h.name
+                for f in table.foreign_keys
+                for h in f.constraint.columns
+            }
         # fk_col_names = set([h for f in table.foreign_key_constraints for h in f.columns.keys()])
-        pk_col_names = set([f for f in table.primary_key.columns.keys()])
+        pk_col_names = set(list(table.primary_key.columns.keys()))
     else:
         fk_col_names = set()
         pk_col_names = set()
@@ -237,9 +241,9 @@ def _render_table_html(
             else ""
         )
         if show_datatypes:
-            return "- %s : %s" % (col.name + suffix, format_col_type(col))
+            return f"- {col.name + suffix} : {format_col_type(col)}"
         else:
-            return "- %s" % (col.name + suffix)
+            return f"- {col.name + suffix}"
 
     def format_name(obj_name, format_dict):
         # Check if format_dict was provided
@@ -270,32 +274,27 @@ def _render_table_html(
     table_str = format_name(table.name, format_table_name)
 
     # Assemble table header
-    html = (
-        '<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="CENTER">%s%s%s</TD></TR><TR><TD BORDER="1" CELLPADDING="0"></TD></TR>'
-        % (schema_str, "." if show_schema_name else "", table_str)
-    )
+    html = f'<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="CENTER">{schema_str}{"." if show_schema_name else ""}{table_str}</TD></TR><TR><TD BORDER="1" CELLPADDING="0"></TD></TR>'
 
     html += "".join(
-        '<TR><TD ALIGN="LEFT" PORT="%s">%s</TD></TR>' % (col.name, format_col_str(col))
+        f'<TR><TD ALIGN="LEFT" PORT="{col.name}">{format_col_str(col)}</TD></TR>'
         for col in table.columns
     )
     if metadata.bind and isinstance(metadata.bind.dialect, PGDialect):
         # postgres engine doesn't reflect indexes
         indexes = dict(
-            (name, defin)
-            for name, defin in metadata.bind.execute(
+            metadata.bind.execute(
                 text(
-                    "SELECT indexname, indexdef FROM pg_indexes WHERE tablename = '%s'"
-                    % table.name
+                    f"SELECT indexname, indexdef FROM pg_indexes WHERE tablename = '{table.name}'"
                 )
             )
         )
         if indexes and show_indexes:
             html += '<TR><TD BORDER="1" CELLPADDING="0"></TD></TR>'
             for index, defin in indexes.items():
-                ilabel = "UNIQUE" in defin and "UNIQUE " or "INDEX "
+                ilabel = "UNIQUE " if "UNIQUE" in defin else "INDEX "
                 ilabel += defin[defin.index("(") :]
-                html += '<TR><TD ALIGN="LEFT">%s</TD></TR>' % ilabel
+                html += f'<TR><TD ALIGN="LEFT">{ilabel}</TD></TR>'
     html += "</TABLE>>"
     return html
 
@@ -338,7 +337,7 @@ def create_schema_graph(
     """
 
     relation_kwargs = {"fontsize": "7.0", "dir": "both"}
-    relation_kwargs.update(relation_options)
+    relation_kwargs |= relation_options
 
     if metadata is None and tables is not None and len(tables):
         metadata = tables[0].metadata
@@ -350,28 +349,16 @@ def create_schema_graph(
         raise ValueError("You need to specify at least tables or metadata")
 
     # check if unexpected keys were used in format_schema_name param
-    if (
-        format_schema_name is not None
-        and len(
-            set(format_schema_name.keys()).difference(
-                {"color", "fontsize", "italics", "bold"}
-            )
-        )
-        > 0
-    ):
+    if format_schema_name is not None and set(
+        format_schema_name.keys()
+    ).difference({"color", "fontsize", "italics", "bold"}):
         raise KeyError(
             "Unrecognized keys were used in dict provided for `format_schema_name` parameter"
         )
     # check if unexpected keys were used in format_table_name param
-    if (
-        format_table_name is not None
-        and len(
-            set(format_table_name.keys()).difference(
-                {"color", "fontsize", "italics", "bold"}
-            )
-        )
-        > 0
-    ):
+    if format_table_name is not None and set(
+        format_table_name.keys()
+    ).difference({"color", "fontsize", "italics", "bold"}):
         raise KeyError(
             "Unrecognized keys were used in dict provided for `format_table_name` parameter"
         )
@@ -385,9 +372,9 @@ def create_schema_graph(
         rankdir=rankdir,
     )
     if restrict_tables is None:
-        restrict_tables = set([t.name.lower() for t in tables])
+        restrict_tables = {t.name.lower() for t in tables}
     else:
-        restrict_tables = set([t.lower() for t in restrict_tables])
+        restrict_tables = {t.lower() for t in restrict_tables}
     tables = [t for t in tables if t.name.lower() in restrict_tables]
     for table in tables:
         graph.add_node(
@@ -418,16 +405,15 @@ def create_schema_graph(
             if is_inheritance:
                 edge = edge[::-1]
             graph_edge = pydot.Edge(
-                headlabel="+ %s" % fk.column.name,
-                taillabel="+ %s" % fk.parent.name,
+                headlabel=f"+ {fk.column.name}",
+                taillabel=f"+ {fk.parent.name}",
                 arrowhead=is_inheritance and "none" or "odot",
                 arrowtail=(fk.parent.primary_key or fk.parent.unique)
                 and "empty"
                 or "crow",
                 fontname=font,
-                # samehead=fk.column.name, sametail=fk.parent.name,
                 *edge,
-                **relation_kwargs
+                **relation_kwargs,
             )
             graph.add_edge(graph_edge)
 

@@ -41,5 +41,4 @@ class LoadDataExecutor(AbstractExecutor):
             executor = LoadCSVExecutor(self.db, self.node)
 
         # for each batch, exec the executor
-        for batch in executor.exec():
-            yield batch
+        yield from executor.exec()

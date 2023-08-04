@@ -63,9 +63,7 @@ class OpenTests(unittest.TestCase):
 
     def test_open_should_open_image(self):
         # Test query runs successfully with Open function call.
-        select_query = """SELECT num, Open("{}") FROM testOpenTable;""".format(
-            self.img_path
-        )
+        select_query = f"""SELECT num, Open("{self.img_path}") FROM testOpenTable;"""
         batch_res = execute_query_fetch_all(self.evadb, select_query)
 
         expected_img = np.array(np.ones((3, 3, 3)), dtype=np.float32)

@@ -30,7 +30,7 @@ class ProjectPlan(AbstractPlan):
         super().__init__(PlanOprType.PROJECT)
 
     def __str__(self):
-        return "ProjectPlan(target_list={})".format(self.target_list)
+        return f"ProjectPlan(target_list={self.target_list})"
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), tuple(self.target_list)))

@@ -127,7 +127,7 @@ class SelectStatement(AbstractStatement):
         target_list_str = ""
         if self._target_list is not None:
             for expr in self._target_list:
-                target_list_str += str(expr) + ", "
+                target_list_str += f"{str(expr)}, "
             target_list_str = target_list_str.rstrip(", ")
 
         orderby_list_str = ""
@@ -138,27 +138,27 @@ class SelectStatement(AbstractStatement):
                     sort_str = "ASC"
                 elif expr[1] == ParserOrderBySortType.DESC:
                     sort_str = "DESC"
-                orderby_list_str += str(expr[0]) + " " + sort_str + ", "
+                orderby_list_str += f"{str(expr[0])} {sort_str}, "
             orderby_list_str = orderby_list_str.rstrip(", ")
 
         select_str = f"SELECT {target_list_str} FROM {str(self._from_table)}"
         if self._where_clause is not None:
-            select_str += " WHERE " + str(self._where_clause)
+            select_str += f" WHERE {str(self._where_clause)}"
 
         if self._union_link is not None:
-            if not self._union_all:
-                select_str += " UNION " + str(self._union_link)
-            else:
-                select_str += " UNION ALL " + str(self._union_link)
+            if self._union_all:
+                select_str += f" UNION ALL {str(self._union_link)}"
 
+            else:
+                select_str += f" UNION {str(self._union_link)}"
         if self._groupby_clause is not None:
-            select_str += " GROUP BY " + str(self._groupby_clause)
+            select_str += f" GROUP BY {str(self._groupby_clause)}"
 
         if self._orderby_list is not None:
-            select_str += " ORDER BY " + orderby_list_str
+            select_str += f" ORDER BY {orderby_list_str}"
 
         if self._limit_count is not None:
-            select_str += " LIMIT " + str(self._limit_count)
+            select_str += f" LIMIT {str(self._limit_count)}"
 
         select_str = select_str.rstrip(" ")
 

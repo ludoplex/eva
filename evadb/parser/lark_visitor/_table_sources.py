@@ -56,16 +56,14 @@ class TableSources:
 
         num_table_joins = len(join_nodes)
 
-        # Join Nodes
-        if num_table_joins > 1:
-            # Add Join nodes -> left deep tree
-            # t1, t2, t3 -> j2 ( j1 ( t1, t2 ), t3 )
-            for i in range(num_table_joins - 1):
-                join_nodes[i + 1].join_node.left = join_nodes[i]
-
-            return join_nodes[-1]
-        else:
+        if num_table_joins <= 1:
             return join_nodes[0]
+        # Add Join nodes -> left deep tree
+        # t1, t2, t3 -> j2 ( j1 ( t1, t2 ), t3 )
+        for i in range(num_table_joins - 1):
+            join_nodes[i + 1].join_node.left = join_nodes[i]
+
+        return join_nodes[-1]
 
     def table_source_item_with_sample(self, tree):
         sample_freq = None
@@ -122,7 +120,7 @@ class TableSources:
                 )
                 raise e
 
-        select_stmt = SelectStatement(
+        return SelectStatement(
             target_list,
             from_clause,
             where_clause,
@@ -130,8 +128,6 @@ class TableSources:
             orderby_list=orderby_clause,
             limit_count=limit_count,
         )
-
-        return select_stmt
 
     # TODO ACTION
     def from_clause(self, tree):
@@ -244,11 +240,7 @@ class TableSources:
             # Here when parsing or later operator, plan?
             left_select_statement.union_link = right_select_statement
 
-            if union_all is False:
-                left_select_statement.union_all = False
-            else:
-                left_select_statement.union_all = True
-
+            left_select_statement.union_all = union_all is not False
         return left_select_statement
 
     def group_by_item(self, tree):

@@ -42,9 +42,7 @@ class DropPlan(AbstractPlan):
         return self._if_exists
 
     def __str__(self):
-        return "DropPlan(_table_infos={}, if_exists={})".format(
-            self._table_infos, self._if_exists
-        )
+        return f"DropPlan(_table_infos={self._table_infos}, if_exists={self._if_exists})"
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), tuple(self._table_infos), self.if_exists))

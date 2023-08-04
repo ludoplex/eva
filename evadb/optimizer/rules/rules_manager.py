@@ -117,8 +117,7 @@ class RulesManager:
             LogicalVectorIndexScanToPhysical(),
         ]
 
-        ray_enabled = config.get_value("experimental", "ray")
-        if ray_enabled:
+        if ray_enabled := config.get_value("experimental", "ray"):
             self._implementation_rules.extend(
                 [
                     LogicalExchangeToPhysical(),
@@ -178,7 +177,9 @@ class RulesManager:
 
     def add_rules(self, rules: List[Rule]):
         def _add_to_list(rule_list, rule_to_remove):
-            if any([rule.rule_type != rule_to_remove.rule_type for rule in rule_list]):
+            if any(
+                rule.rule_type != rule_to_remove.rule_type for rule in rule_list
+            ):
                 rule_list.append(rule)
 
         for rule in rules:

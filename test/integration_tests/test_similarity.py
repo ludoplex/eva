@@ -230,7 +230,7 @@ class SimilarityTests(unittest.TestCase):
                             LIMIT 3;""".format(
             self.img_path
         )
-        explain_query = """EXPLAIN {}""".format(select_query)
+        explain_query = f"""EXPLAIN {select_query}"""
         explain_batch = execute_query_fetch_all(self.evadb, explain_query)
         self.assertTrue("VectorIndexScan" in explain_batch.frames[0][0])
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
@@ -270,7 +270,7 @@ class SimilarityTests(unittest.TestCase):
                             LIMIT 3;""".format(
             self.img_path
         )
-        explain_query = """EXPLAIN {}""".format(select_query)
+        explain_query = f"""EXPLAIN {select_query}"""
         explain_batch = execute_query_fetch_all(self.evadb, explain_query)
         self.assertTrue("VectorIndexScan" in explain_batch.frames[0][0])
         actual_batch = execute_query_fetch_all(self.evadb, select_query)

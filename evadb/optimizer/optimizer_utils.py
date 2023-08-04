@@ -73,15 +73,13 @@ def metadata_definition_to_udf_metadata(metadata_list: List[Tuple[str, str]]):
     Arguments:
         col_list(List[Tuple[str, str]]): parsed metadata definitions
     """
-    result_list = []
-    for metadata in metadata_list:
-        result_list.append(
-            UdfMetadataCatalogEntry(
-                metadata[0],
-                metadata[1],
-            )
+    return [
+        UdfMetadataCatalogEntry(
+            metadata[0],
+            metadata[1],
         )
-    return result_list
+        for metadata in metadata_list
+    ]
 
 
 def extract_equi_join_keys(
@@ -179,7 +177,7 @@ def extract_pushdown_predicate_for_alias(
     aliases = [alias.alias_name for alias in aliases]
     for pred in pred_list:
         column_aliases = get_columns_in_predicate(pred)
-        table_aliases = set([col.split(".")[0] for col in column_aliases])
+        table_aliases = {col.split(".")[0] for col in column_aliases}
         if table_aliases.issubset(set(aliases)):
             pushdown_preds.append(pred)
         else:
@@ -242,10 +240,9 @@ def enable_cache_init(
     if not cache_entry:
         cache_entry = catalog.insert_udf_cache_catalog_entry(func_expr)
 
-    cache = FunctionExpressionCache(
+    return FunctionExpressionCache(
         key=tuple(optimized_key), store=DiskKVCache(cache_entry.cache_path)
     )
-    return cache
 
 
 def enable_cache(
@@ -306,12 +303,13 @@ def get_expression_execution_cost(
     Returns:
         float: The estimated cost of executing the function expression.
     """
-    total_cost = 0
-    # iterate over all the function expression and accumulate the cost
-    for child_expr in expr.find_all(FunctionExpression):
-        cost_entry = context.db.catalog().get_udf_cost_catalog_entry(child_expr.name)
-        if cost_entry:
-            total_cost += cost_entry.cost
-        else:
-            total_cost += DEFAULT_FUNCTION_EXPRESSION_COST
-    return total_cost
+    return sum(
+        cost_entry.cost
+        if (
+            cost_entry := context.db.catalog().get_udf_cost_catalog_entry(
+                child_expr.name
+            )
+        )
+        else DEFAULT_FUNCTION_EXPRESSION_COST
+        for child_expr in expr.find_all(FunctionExpression)
+    )

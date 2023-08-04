@@ -82,16 +82,14 @@ class ColumnDefinition:
         if self._dimension is not None:
             dimension_str += "["
             for dim in self._dimension:
-                dimension_str += str(dim) + ", "
+                dimension_str += f"{str(dim)}, "
             dimension_str = dimension_str.rstrip(", ")
             dimension_str += "]"
 
         if self.array_type is None:
-            return "{} {}".format(self._name, self._type)
+            return f"{self._name} {self._type}"
         else:
-            return "{} {} {} {}".format(
-                self._name, self._type, self.array_type, dimension_str
-            )
+            return f"{self._name} {self._type} {self.array_type} {dimension_str}"
 
     def __eq__(self, other):
         if not isinstance(other, ColumnDefinition):
@@ -131,12 +129,10 @@ class CreateTableStatement(AbstractStatement):
         self._query = query
 
     def __str__(self) -> str:
-        print_str = "CREATE TABLE {} ({}) \n".format(
-            self._table_info, self._if_not_exists
-        )
+        print_str = f"CREATE TABLE {self._table_info} ({self._if_not_exists}) \n"
 
         if self._query is not None:
-            print_str = "CREATE TABLE {} AS {}\n".format(self._table_info, self._query)
+            print_str = f"CREATE TABLE {self._table_info} AS {self._query}\n"
 
         for column in self.column_list:
             print_str += str(column) + "\n"

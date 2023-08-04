@@ -41,16 +41,12 @@ class FastRCNNObjectDetectorTest(unittest.TestCase):
                     FastRCNNObjectDetector,
                 )
 
-                pass
-
     def test_should_raise_import_error_with_missing_torchvision(self):
         with self.assertRaises(ImportError):
             with mock.patch.dict(sys.modules, {"torchvision": None}):
                 from evadb.udfs.fastrcnn_object_detector import (  # noqa: F401
                     FastRCNNObjectDetector,
                 )
-
-                pass
 
     @unittest.skip("disable test due to model downloading time")
     def test_should_return_batches_equivalent_to_number_of_frames(self):

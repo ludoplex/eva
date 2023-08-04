@@ -38,8 +38,7 @@ class Expressions:
                 array_element = self.visit(child).value
                 array_elements.append(array_element)
 
-        res = ConstantValueExpression(np.array(array_elements), ColumnType.NDARRAY)
-        return res
+        return ConstantValueExpression(np.array(array_elements), ColumnType.NDARRAY)
 
     def constant(self, tree):
         for child in tree.children:
@@ -116,7 +115,7 @@ class Expressions:
 
     def sample_clause_with_type(self, tree):
         sample_list = self.visit_children(tree)
-        assert len(sample_list) == 3 or len(sample_list) == 2
+        assert len(sample_list) in {3, 2}
         if len(sample_list) == 3:
             return ConstantValueExpression(sample_list[1]), ConstantValueExpression(
                 sample_list[2]

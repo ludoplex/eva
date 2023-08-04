@@ -36,7 +36,7 @@ class MnistImageClassifier(PytorchAbstractClassifierUDF):
 
     @property
     def labels(self):
-        return list([str(num) for num in range(10)])
+        return [str(num) for num in range(10)]
 
     def transform(self, images) -> Compose:
         composed = Compose(
@@ -73,14 +73,11 @@ class MLP(nn.Module):
         current_dims = input_dims
         layers = OrderedDict()
 
-        if isinstance(n_hiddens, int):
-            n_hiddens = [n_hiddens]
-        else:
-            n_hiddens = list(n_hiddens)
+        n_hiddens = [n_hiddens] if isinstance(n_hiddens, int) else list(n_hiddens)
         for i, n_hidden in enumerate(n_hiddens):
-            layers["fc{}".format(i + 1)] = nn.Linear(current_dims, n_hidden)
-            layers["relu{}".format(i + 1)] = nn.ReLU()
-            layers["drop{}".format(i + 1)] = nn.Dropout(0.2)
+            layers[f"fc{i + 1}"] = nn.Linear(current_dims, n_hidden)
+            layers[f"relu{i + 1}"] = nn.ReLU()
+            layers[f"drop{i + 1}"] = nn.Dropout(0.2)
             current_dims = n_hidden
         layers["out"] = nn.Linear(current_dims, n_class)
 

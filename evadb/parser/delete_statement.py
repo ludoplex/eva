@@ -38,7 +38,7 @@ class DeleteTableStatement(AbstractStatement):
     def __str__(self) -> str:
         delete_str = f"DELETE FROM {self._table_ref}"
         if self._where_clause is not None:
-            delete_str += " WHERE " + str(self._where_clause)
+            delete_str += f" WHERE {str(self._where_clause)}"
 
         return delete_str
 

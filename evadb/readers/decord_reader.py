@@ -70,7 +70,7 @@ class DecordReader(AbstractReader):
         self.initialize_reader()
 
     def _read(self) -> Iterator[Dict]:
-        num_frames = int(len(self._reader))
+        num_frames = len(self._reader)
         if self._predicate:
             range_list = extract_range_list_from_predicate(
                 self._predicate, 0, num_frames - 1

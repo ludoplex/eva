@@ -90,8 +90,7 @@ def sample_image():
 def sample_audio():
     duration_ms, sample_rate = 1000, 16000
     num_samples = int(duration_ms * sample_rate / 1000)
-    audio_data = np.random.rand(num_samples)
-    return audio_data
+    return np.random.rand(num_samples)
 
 
 def gen_sample_input(input_type: HFInputTypes):
@@ -122,16 +121,12 @@ def infer_output_name_and_type(**pipeline_args):
     model_input = gen_sample_input(input_type)
     model_output = pipe(model_input)
 
-    # Get a dictionary of output names and types from the output
-    output_types = {}
     if isinstance(model_output, list):
         sample_out = model_output[0]
     else:
         sample_out = model_output
 
-    for key, value in sample_out.items():
-        output_types[key] = type(value)
-
+    output_types = {key: type(value) for key, value in sample_out.items()}
     return input_type, output_types
 
 
@@ -177,17 +172,15 @@ def io_entry_for_outputs(udf_outputs: Dict[str, Type]):
     """
     Generates the IO Catalog Entry for the output
     """
-    outputs = []
-    for col_name, col_type in udf_outputs.items():
-        outputs.append(
-            UdfIOCatalogEntry(
-                name=col_name,
-                type=ColumnType.NDARRAY,
-                array_type=ptype_to_ndarray_type(col_type),
-                is_input=False,
-            )
+    return [
+        UdfIOCatalogEntry(
+            name=col_name,
+            type=ColumnType.NDARRAY,
+            array_type=ptype_to_ndarray_type(col_type),
+            is_input=False,
         )
-    return outputs
+        for col_name, col_type in udf_outputs.items()
+    ]
 
 
 def gen_hf_io_catalog_entries(udf_name: str, metadata: List[UdfMetadataCatalogEntry]):

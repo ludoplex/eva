@@ -42,7 +42,7 @@ class DropUDFPlan(AbstractPlan):
         return self._if_exists
 
     def __str__(self):
-        return "DropUDFPlan(name={}, if_exists={})".format(self._name, self._if_exists)
+        return f"DropUDFPlan(name={self._name}, if_exists={self._if_exists})"
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.name, self.if_exists))

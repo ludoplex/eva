@@ -83,10 +83,7 @@ class GroupExpression:
         )
 
     def __str__(self) -> str:
-        return "%s(%s)" % (
-            type(self).__name__,
-            ", ".join("%s=%s" % item for item in vars(self).items()),
-        )
+        return f'{type(self).__name__}({", ".join("%s=%s" % item for item in vars(self).items())})'
 
     def __hash__(self):
         return hash((self.opr, tuple(self.children)))

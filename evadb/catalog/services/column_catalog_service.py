@@ -30,15 +30,15 @@ class ColumnCatalogService(BaseService):
     def filter_entry_by_table_id_and_name(
         self, table_id, column_name
     ) -> ColumnCatalogEntry:
-        entry = self.session.execute(
+        if entry := self.session.execute(
             select(self.model).filter(
                 self.model._table_id == table_id,
                 self.model._name == column_name,
             )
-        ).scalar_one_or_none()
-        if entry:
+        ).scalar_one_or_none():
             return entry.as_dataclass()
-        return entry
+        else:
+            return entry
 
     def filter_entries_by_table_id(self, table_id: int) -> List[ColumnCatalogEntry]:
         """return all the columns for table table_id"""
@@ -56,12 +56,12 @@ class ColumnCatalogService(BaseService):
     def get_entry_by_id(
         self, col_id: int, return_alchemy=False
     ) -> List[ColumnCatalogEntry]:
-        entry = self.session.execute(
+        if entry := self.session.execute(
             select(self.model).filter(self.model._row_id == col_id)
-        ).scalar_one_or_none()
-        if entry:
+        ).scalar_one_or_none():
             return entry if return_alchemy else entry.as_dataclass()
-        return entry
+        else:
+            return entry
 
     def insert_entries(self, column_list: List[ColumnCatalogEntry]):
         catalog_column_objs = [
@@ -75,9 +75,9 @@ class ColumnCatalogService(BaseService):
             )
             for col in column_list
         ]
-        saved_column_objs = []
-        for column in catalog_column_objs:
-            saved_column_objs.append(column.save(self.session))
+        saved_column_objs = [
+            column.save(self.session) for column in catalog_column_objs
+        ]
         return [obj.as_dataclass() for obj in saved_column_objs]
 
     def filter_entries_by_table(

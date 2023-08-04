@@ -68,19 +68,14 @@ class Group:
         self._is_explored = True
 
     def __str__(self) -> str:
-        return "%s(%s)" % (
-            type(self).__name__,
-            ", ".join("%s=%s" % item for item in vars(self).items()),
-        )
+        return f'{type(self).__name__}({", ".join("%s=%s" % item for item in vars(self).items())})'
 
     def add_expr(self, expr: GroupExpression):
         if expr.group_id == UNDEFINED_GROUP_ID:
             expr.group_id = self.group_id
 
         if expr.group_id != self.group_id:
-            logger.error(
-                "Expected group id {}, found {}".format(self.group_id, expr.group_id)
-            )
+            logger.error(f"Expected group id {self.group_id}, found {expr.group_id}")
             return
 
         if expr.opr.is_logical():
@@ -89,15 +84,13 @@ class Group:
             self._add_physical_expr(expr)
 
     def get_best_expr(self, property: Property) -> GroupExpression:
-        winner = self._winner_exprs.get(property, None)
-        if winner:
+        if winner := self._winner_exprs.get(property, None):
             return winner.grp_expr
         else:
             return None
 
     def get_best_expr_cost(self, property: Property):
-        winner = self._winner_exprs.get(property, None)
-        if winner:
+        if winner := self._winner_exprs.get(property, None):
             return winner.cost
         else:
             return None

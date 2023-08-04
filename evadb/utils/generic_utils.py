@@ -42,7 +42,7 @@ def validate_kwargs(
             raise TypeError(error_message, kwarg)
 
     missing_keys = [key for key in required_keys if key not in kwargs]
-    assert len(missing_keys) == 0, f"Missing required keys, {missing_keys}"
+    assert not missing_keys, f"Missing required keys, {missing_keys}"
 
 
 def str_to_class(class_path: str):
@@ -162,12 +162,12 @@ def get_size(obj, seen=None):
     # self-referential objects
     seen.add(obj_id)
     if isinstance(obj, dict):
-        size += sum([get_size(v, seen) for v in obj.values()])
-        size += sum([get_size(k, seen) for k in obj.keys()])
+        size += sum(get_size(v, seen) for v in obj.values())
+        size += sum(get_size(k, seen) for k in obj.keys())
     elif hasattr(obj, "__dict__"):
         size += get_size(obj.__dict__, seen)
     elif hasattr(obj, "__iter__") and not isinstance(obj, (str, bytes, bytearray)):
-        size += sum([get_size(i, seen) for i in obj])
+        size += sum(get_size(i, seen) for i in obj)
     return size
 
 

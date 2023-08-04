@@ -36,5 +36,4 @@ class UnionExecutor(AbstractExecutor):
 
         # We should have only two children
         for child in self.children:
-            for batch in child.exec():
-                yield batch
+            yield from child.exec()

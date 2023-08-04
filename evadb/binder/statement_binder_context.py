@@ -45,8 +45,8 @@ class StatementBinderContext:
 
     def __init__(self, catalog: Callable):
         self._catalog = catalog
-        self._table_alias_map: Dict[str, TableCatalogEntry] = dict()
-        self._derived_table_alias_map: Dict[str, Dict[str, CatalogColumnType]] = dict()
+        self._table_alias_map: Dict[str, TableCatalogEntry] = {}
+        self._derived_table_alias_map: Dict[str, Dict[str, CatalogColumnType]] = {}
         self._retrieve_audio = False
         self._retrieve_video = False
 
@@ -142,8 +142,7 @@ class StatementBinderContext:
         Returns:
             column object
         """
-        table_obj = self._table_alias_map.get(alias, None)
-        if table_obj:
+        if table_obj := self._table_alias_map.get(alias, None):
             return self._catalog().get_column_catalog_entry(table_obj, col_name)
 
     def _check_derived_table_alias_map(self, alias, col_name) -> CatalogColumnType:
@@ -172,9 +171,9 @@ class StatementBinderContext:
         """
         alias_cols = []
         for alias, table_obj in self._table_alias_map.items():
-            alias_cols += list([(alias, col.name) for col in table_obj.columns])
+            alias_cols += [(alias, col.name) for col in table_obj.columns]
         for alias, col_objs_map in self._derived_table_alias_map.items():
-            alias_cols += list([(alias, col_name) for col_name in col_objs_map])
+            alias_cols += [(alias, col_name) for col_name in col_objs_map]
         return alias_cols
 
     def _search_all_alias_maps(self, col_name: str) -> Tuple[str, CatalogColumnType]:
@@ -190,15 +189,13 @@ class StatementBinderContext:
         alias_match = None
         match_obj = None
         for alias in self._table_alias_map:
-            col_obj = self._check_table_alias_map(alias, col_name)
-            if col_obj:
+            if col_obj := self._check_table_alias_map(alias, col_name):
                 match_obj = col_obj
                 num_alias_matches += 1
                 alias_match = alias
 
         for alias in self._derived_table_alias_map:
-            col_obj = self._check_derived_table_alias_map(alias, col_name)
-            if col_obj:
+            if col_obj := self._check_derived_table_alias_map(alias, col_name):
                 match_obj = col_obj
                 num_alias_matches += 1
                 alias_match = alias

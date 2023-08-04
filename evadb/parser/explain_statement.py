@@ -22,8 +22,7 @@ class ExplainStatement(AbstractStatement):
         self._explainable_stmt = explainable_stmt
 
     def __str__(self) -> str:
-        print_str = "EXPLAIN {}".format(str(self._explainable_stmt))
-        return print_str
+        return f"EXPLAIN {str(self._explainable_stmt)}"
 
     @property
     def explainable_stmt(self) -> AbstractStatement:

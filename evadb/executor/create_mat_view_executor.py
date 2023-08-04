@@ -30,9 +30,7 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
         ):
             assert (
                 len(self.children) == 1
-            ), "Create materialized view expects 1 child, finds {}".format(
-                len(self.children)
-            )
+            ), f"Create materialized view expects 1 child, finds {len(self.children)}"
             child = self.children[0]
 
             view_catalog_entry = self.catalog().create_and_insert_table_catalog_entry(

@@ -52,8 +52,6 @@ class YoloTest(unittest.TestCase):
                     Yolo,
                 )
 
-                pass
-
     @unittest.skip("disable test due to model downloading time")
     def test_should_return_batches_equivalent_to_number_of_frames(self):
         from evadb.udfs.decorators.yolo_object_detection_decorators import Yolo
@@ -73,8 +71,7 @@ class YoloTest(unittest.TestCase):
         frame_dog = numpy_to_yolo_format(test_df_dog["data"].values[0])
         frame_cat = numpy_to_yolo_format(test_df_cat["data"].values[0])
         detector = Yolo()
-        result = []
-        result.append(detector.forward(frame_dog))
+        result = [detector.forward(frame_dog)]
         result.append(detector.forward(frame_cat))
 
         self.assertEqual(["dog"], result[0]["labels"].tolist()[0])

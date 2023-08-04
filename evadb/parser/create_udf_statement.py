@@ -63,18 +63,12 @@ class CreateUDFStatement(AbstractStatement):
         self._metadata = metadata
 
     def __str__(self) -> str:
-        exists_str = " "
-        if self._if_not_exists:
-            exists_str = " IF NOT EXISTS "
-
+        exists_str = " IF NOT EXISTS " if self._if_not_exists else " "
         type_str = ""
         if self._udf_type is not None:
-            type_str += "TYPE " + str(self._udf_type)
+            type_str += f"TYPE {str(self._udf_type)}"
 
-        impl_str = ""
-        if self._impl_path:
-            impl_str = f" IMPL {self._impl_path.name} "
-
+        impl_str = f" IMPL {self._impl_path.name} " if self._impl_path else ""
         metadata_str = ""
         if self._metadata is not None:
             for key, value in self._metadata:

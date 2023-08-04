@@ -60,14 +60,12 @@ class SQLStorageEngine(AbstractStorageEngine):
         return dict_row
 
     def _sql_row_to_dict(self, sql_row: tuple, columns: List[ColumnCatalogEntry]):
-        # Deserialize numpy data
-        dict_row = {}
-        for idx, col in enumerate(columns):
-            if col.type == ColumnType.NDARRAY:
-                dict_row[col.name] = self._serializer.deserialize(sql_row[idx])
-            else:
-                dict_row[col.name] = sql_row[idx]
-        return dict_row
+        return {
+            col.name: self._serializer.deserialize(sql_row[idx])
+            if col.type == ColumnType.NDARRAY
+            else sql_row[idx]
+            for idx, col in enumerate(columns)
+        }
 
     def _try_loading_table_via_reflection(self, table_name: str):
         metadata_obj = BaseModel.metadata
@@ -96,7 +94,7 @@ class SQLStorageEngine(AbstractStorageEngine):
         # the sqlalchemy engine.
         table_columns = [col for col in table.columns if col.name != IDENTIFIER_COLUMN]
         sqlalchemy_schema = SchemaUtils.xform_to_sqlalchemy_schema(table_columns)
-        attr_dict.update(sqlalchemy_schema)
+        attr_dict |= sqlalchemy_schema
 
         insp = inspect(self._sql_engine)
         if insp.has_table(table.name):

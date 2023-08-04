@@ -57,7 +57,7 @@ FRAME_SIZE = (32, 32)
 def suffix_pytest_xdist_worker_id_to_dir(path: str):
     try:
         worker_id = os.environ["PYTEST_XDIST_WORKER"]
-        path = Path(str(worker_id) + "_" + path)
+        path = Path(f"{str(worker_id)}_{path}")
     except KeyError:
         pass
     return path
@@ -203,16 +203,14 @@ def find_free_port():
 def get_logical_query_plan(db, query: str) -> Operator:
     stmt = Parser().parse(query)[0]
     StatementBinder(StatementBinderContext(db.catalog)).bind(stmt)
-    l_plan = StatementToPlanConverter().visit(stmt)
-    return l_plan
+    return StatementToPlanConverter().visit(stmt)
 
 
 def get_physical_query_plan(
     db, query: str, rule_manager=None, cost_model=None
 ) -> AbstractPlan:
     l_plan = get_logical_query_plan(db, query)
-    p_plan = asyncio.run(PlanGenerator(db, rule_manager, cost_model).build(l_plan))
-    return p_plan
+    return asyncio.run(PlanGenerator(db, rule_manager, cost_model).build(l_plan))
 
 
 def remove_udf_cache(db, query):
@@ -228,15 +226,16 @@ def remove_udf_cache(db, query):
 
 
 def create_dataframe(num_frames=1) -> pd.DataFrame:
-    frames = []
-    for i in range(1, num_frames + 1):
-        frames.append({"id": i, "data": (i * np.ones((1, 1)))})
+    frames = [
+        {"id": i, "data": (i * np.ones((1, 1)))}
+        for i in range(1, num_frames + 1)
+    ]
     return pd.DataFrame(frames)
 
 
 def create_dataframe_same(times=1):
     base_df = create_dataframe()
-    for i in range(1, times):
+    for _ in range(1, times):
         base_df = pd.concat([base_df, create_dataframe()], ignore_index=True)
     return base_df
 
@@ -250,9 +249,8 @@ def custom_list_of_dicts_equal(one, two):
                 if not np.array_equal(v1[key], v2[key]):
                     return False
 
-            else:
-                if v1[key] != v2[key]:
-                    return False
+            elif v1[key] != v2[key]:
+                return False
 
     return True
 
@@ -339,14 +337,13 @@ def create_text_csv(num_rows=30):
 
 
 def create_table(db, table_name, num_rows, num_columns):
-    # creates a table with num_rows tuples and columns = [a1, a2, a3, ...]
-    columns = "".join("a{} INTEGER, ".format(i) for i in range(num_columns - 1))
-    columns += "a{} INTEGER".format(num_columns - 1)
-    create_table_query = "CREATE TABLE IF NOT EXISTS {} ( {} );".format(
-        table_name, columns
+    columns = (
+        "".join(f"a{i} INTEGER, " for i in range(num_columns - 1))
+        + f"a{num_columns - 1} INTEGER"
     )
+    create_table_query = f"CREATE TABLE IF NOT EXISTS {table_name} ( {columns} );"
     execute_query_fetch_all(db, create_table_query)
-    columns = ["a{}".format(i) for i in range(num_columns)]
+    columns = [f"a{i}" for i in range(num_columns)]
     df, csv_file_path = create_csv(num_rows, columns)
     # load the CSV
     load_query = f"LOAD CSV '{csv_file_path}' INTO {table_name};"

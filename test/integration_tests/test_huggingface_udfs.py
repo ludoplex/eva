@@ -109,20 +109,26 @@ class HuggingFaceTests(unittest.TestCase):
         self.assertEqual(len(output.frames), 4)
 
         # Test that there exists a column with udf_name.score and each entry is a list of floats
-        self.assertTrue(udf_name.lower() + ".score" in output_frames.columns)
+        self.assertTrue(f"{udf_name.lower()}.score" in output_frames.columns)
         self.assertTrue(
-            all(isinstance(x, list) for x in output.frames[udf_name.lower() + ".score"])
+            all(
+                isinstance(x, list)
+                for x in output.frames[f"{udf_name.lower()}.score"]
+            )
         )
 
         # Test that there exists a column with udf_name.label and each entry is a list of strings
-        self.assertTrue(udf_name.lower() + ".label" in output_frames.columns)
+        self.assertTrue(f"{udf_name.lower()}.label" in output_frames.columns)
         self.assertTrue(
-            all(isinstance(x, list) for x in output.frames[udf_name.lower() + ".label"])
+            all(
+                isinstance(x, list)
+                for x in output.frames[f"{udf_name.lower()}.label"]
+            )
         )
 
         # Test that there exists a column with udf_name.box and each entry is a dictionary with 4 keys
-        self.assertTrue(udf_name.lower() + ".box" in output_frames.columns)
-        for bbox in output.frames[udf_name.lower() + ".box"]:
+        self.assertTrue(f"{udf_name.lower()}.box" in output_frames.columns)
+        for bbox in output.frames[f"{udf_name.lower()}.box"]:
             self.assertTrue(isinstance(bbox, list))
             bbox = bbox[0]
             self.assertTrue(isinstance(bbox, dict))
@@ -151,15 +157,21 @@ class HuggingFaceTests(unittest.TestCase):
         self.assertEqual(len(output.frames.columns), 2)
 
         # Test that there exists a column with udf_name.score and each entry is a list of floats
-        self.assertTrue(udf_name.lower() + ".score" in output.frames.columns)
+        self.assertTrue(f"{udf_name.lower()}.score" in output.frames.columns)
         self.assertTrue(
-            all(isinstance(x, list) for x in output.frames[udf_name.lower() + ".score"])
+            all(
+                isinstance(x, list)
+                for x in output.frames[f"{udf_name.lower()}.score"]
+            )
         )
 
         # Test that there exists a column with udf_name.label and each entry is a list of strings
-        self.assertTrue(udf_name.lower() + ".label" in output.frames.columns)
+        self.assertTrue(f"{udf_name.lower()}.label" in output.frames.columns)
         self.assertTrue(
-            all(isinstance(x, list) for x in output.frames[udf_name.lower() + ".label"])
+            all(
+                isinstance(x, list)
+                for x in output.frames[f"{udf_name.lower()}.label"]
+            )
         )
 
         drop_udf_query = f"DROP UDF {udf_name};"
@@ -190,19 +202,20 @@ class HuggingFaceTests(unittest.TestCase):
         self.assertEqual(len(output.frames.columns), 2)
 
         # Test that there exists a column with udf_name.label and each entry is either "POSITIVE" or "NEGATIVE"
-        self.assertTrue(udf_name.lower() + ".label" in output.frames.columns)
+        self.assertTrue(f"{udf_name.lower()}.label" in output.frames.columns)
         self.assertTrue(
             all(
                 x in ["POSITIVE", "NEGATIVE"]
-                for x in output.frames[udf_name.lower() + ".label"]
+                for x in output.frames[f"{udf_name.lower()}.label"]
             )
         )
 
         # Test that there exists a column with udf_name.score and each entry is a float
-        self.assertTrue(udf_name.lower() + ".score" in output.frames.columns)
+        self.assertTrue(f"{udf_name.lower()}.score" in output.frames.columns)
         self.assertTrue(
             all(
-                isinstance(x, float) for x in output.frames[udf_name.lower() + ".score"]
+                isinstance(x, float)
+                for x in output.frames[f"{udf_name.lower()}.score"]
             )
         )
 
@@ -303,20 +316,21 @@ class HuggingFaceTests(unittest.TestCase):
         self.assertEqual(len(output.frames.columns), 2)
 
         # Test that there exists a column with udf_name.label and each entry is either "POSITIVE" or "NEGATIVE"
-        self.assertTrue(udf_name.lower() + ".label" in output.frames.columns)
+        self.assertTrue(f"{udf_name.lower()}.label" in output.frames.columns)
         self.assertTrue(
             all(
                 x in ["non-toxic", "toxic"]
-                for x in output.frames[udf_name.lower() + ".label"]
+                for x in output.frames[f"{udf_name.lower()}.label"]
             )
         )
 
         # Test that there exists a column with udf_name.score
         # and each entry is a float
-        self.assertTrue(udf_name.lower() + ".score" in output.frames.columns)
+        self.assertTrue(f"{udf_name.lower()}.score" in output.frames.columns)
         self.assertTrue(
             all(
-                isinstance(x, float) for x in output.frames[udf_name.lower() + ".score"]
+                isinstance(x, float)
+                for x in output.frames[f"{udf_name.lower()}.score"]
             )
         )
 
@@ -352,19 +366,20 @@ class HuggingFaceTests(unittest.TestCase):
         self.assertEqual(len(output.frames.columns), 2)
 
         # Test that there exists a column with udf_name.label and each entry is either "POSITIVE" or "NEGATIVE"
-        self.assertTrue(udf_name.lower() + ".label" in output.frames.columns)
+        self.assertTrue(f"{udf_name.lower()}.label" in output.frames.columns)
         self.assertTrue(
             all(
                 x in ["LABEL_1", "LABEL_0"]
-                for x in output.frames[udf_name.lower() + ".label"]
+                for x in output.frames[f"{udf_name.lower()}.label"]
             )
         )
 
         # Test that there exists a column with udf_name.score and each entry is a float
-        self.assertTrue(udf_name.lower() + ".score" in output.frames.columns)
+        self.assertTrue(f"{udf_name.lower()}.score" in output.frames.columns)
         self.assertTrue(
             all(
-                isinstance(x, float) for x in output.frames[udf_name.lower() + ".score"]
+                isinstance(x, float)
+                for x in output.frames[f"{udf_name.lower()}.score"]
             )
         )
 
@@ -388,21 +403,17 @@ class HuggingFaceTests(unittest.TestCase):
         self.assertEqual(len(output.frames.columns), 7)
 
         # Test that there exists a column with udf_name.entity
-        self.assertTrue(udf_name.lower() + ".entity" in output.frames.columns)
+        self.assertTrue(f"{udf_name.lower()}.entity" in output.frames.columns)
 
         # Test that there exists a column with udf_name.score
-        self.assertTrue(udf_name.lower() + ".score" in output.frames.columns)
+        self.assertTrue(f"{udf_name.lower()}.score" in output.frames.columns)
 
         drop_udf_query = f"DROP UDF {udf_name};"
         execute_query_fetch_all(self.evadb, drop_udf_query)
 
     def test_select_and_groupby_with_paragraphs(self):
         segment_size = 10
-        select_query = (
-            "SELECT SEGMENT(data) FROM MyPDFs GROUP BY '{}paragraphs';".format(
-                segment_size
-            )
-        )
+        select_query = f"SELECT SEGMENT(data) FROM MyPDFs GROUP BY '{segment_size}paragraphs';"
         output = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(len(output.frames), 3)
 
@@ -426,7 +437,7 @@ class HuggingFaceTests(unittest.TestCase):
         self.assertEqual(len(output.frames.columns), 1)
 
         # Test that there does not exist a column with udf_name.entity
-        self.assertFalse(udf_name.lower() + ".entity" in output.frames.columns)
+        self.assertFalse(f"{udf_name.lower()}.entity" in output.frames.columns)
 
         drop_udf_query = f"DROP UDF {udf_name};"
         execute_query_fetch_all(self.evadb, drop_udf_query)

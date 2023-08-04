@@ -257,7 +257,6 @@ statement_to_opr_converter.column_definition_to_udf_io"
         self.assertNotEqual(dummy_plan, object)
 
     def test_check_plan_equality(self):
-        plans = []
         dummy_plan = Dummy(MagicMock(), MagicMock())
         create_plan = LogicalCreate(MagicMock(), MagicMock())
         create_udf_plan = LogicalCreateUDF(
@@ -301,41 +300,39 @@ statement_to_opr_converter.column_definition_to_udf_io"
         )
         create_plan.append_child(create_udf_plan)
 
-        plans.append(dummy_plan)
-        plans.append(create_plan)
-        plans.append(create_udf_plan)
-        plans.append(create_index_plan)
-        plans.append(create_materialized_view_plan)
-        plans.append(delete_plan)
-        plans.append(insert_plan)
-        plans.append(query_derived_plan)
-        plans.append(load_plan)
-        plans.append(limit_plan)
-        plans.append(rename_plan)
-        plans.append(drop_plan)
-        plans.append(drop_udf_plan)
-        plans.append(get_plan)
-        plans.append(sample_plan)
-        plans.append(filter_plan)
-        plans.append(groupby_plan)
-        plans.append(order_by_plan)
-        plans.append(union_plan)
-        plans.append(function_scan_plan)
-        plans.append(join_plan)
-        plans.append(apply_and_merge_plan)
-        plans.append(show_plan)
-        plans.append(explain_plan)
-        plans.append(exchange_plan)
-        plans.append(faiss_plan)
-        plans.append(project_plan)
-        plans.append(extract_object_plan)
-
+        plans = [
+            dummy_plan,
+            create_plan,
+            create_udf_plan,
+            create_index_plan,
+            create_materialized_view_plan,
+            delete_plan,
+            insert_plan,
+            query_derived_plan,
+            load_plan,
+            limit_plan,
+            rename_plan,
+            drop_plan,
+            drop_udf_plan,
+            get_plan,
+            sample_plan,
+            filter_plan,
+            groupby_plan,
+            order_by_plan,
+            union_plan,
+            function_scan_plan,
+            join_plan,
+            apply_and_merge_plan,
+            show_plan,
+            explain_plan,
+            exchange_plan,
+            faiss_plan,
+            project_plan,
+            extract_object_plan,
+        ]
         derived_operators = list(get_all_subclasses(Operator))
 
-        plan_type_list = []
-        for plan in plans:
-            plan_type_list.append(type(plan))
-
+        plan_type_list = [type(plan) for plan in plans]
         length = len(plans)
         self.assertEqual(length, len(derived_operators))
         self.assertEqual(len(list(set(derived_operators) - set(plan_type_list))), 0)

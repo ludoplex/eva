@@ -49,11 +49,9 @@ class Functions:
         return func_expr
 
     def function_args(self, tree):
-        args = []
-        for child in tree.children:
-            if isinstance(child, Tree):
-                args.append(self.visit(child))
-        return args
+        return [
+            self.visit(child) for child in tree.children if isinstance(child, Tree)
+        ]
 
     # Drop UDF
     def drop_udf(self, tree):
@@ -157,5 +155,4 @@ class Functions:
                     agg_func_arg = TupleValueExpression(col_name="id")
 
         agg_func_type = self.get_aggregate_function_type(agg_func_name)
-        agg_expr = AggregationExpression(agg_func_type, None, agg_func_arg)
-        return agg_expr
+        return AggregationExpression(agg_func_type, None, agg_func_arg)

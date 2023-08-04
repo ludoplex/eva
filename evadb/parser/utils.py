@@ -111,8 +111,7 @@ def parse_lateral_join(expr: str, alias: str):
 
 def parse_create_vector_index(index_name: str, table_name: str, expr: str, using: str):
     mock_query = f"CREATE INDEX {index_name} ON {table_name} ({expr}) USING {using};"
-    stmt = Parser().parse(mock_query)[0]
-    return stmt
+    return Parser().parse(mock_query)[0]
 
 
 def parse_sql_orderby_expr(expr: str):

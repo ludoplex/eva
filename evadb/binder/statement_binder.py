@@ -150,38 +150,37 @@ class StatementBinder:
 
     @bind.register(CreateTableStatement)
     def _bind_create_statement(self, node: CreateTableStatement):
-        if node.query is not None:
-            self.bind(node.query)
-            num_projected_columns = 0
-            for expr in node.query.target_list:
-                if expr.etype == ExpressionType.TUPLE_VALUE:
-                    num_projected_columns += 1
-                elif expr.etype == ExpressionType.FUNCTION_EXPRESSION:
-                    num_projected_columns += len(expr.output_objs)
-                else:
-                    raise BinderError(
-                        "Unsupported expression type {}.".format(expr.etype)
-                    )
+        if node.query is None:
+            return
+        self.bind(node.query)
+        num_projected_columns = 0
+        for expr in node.query.target_list:
+            if expr.etype == ExpressionType.TUPLE_VALUE:
+                num_projected_columns += 1
+            elif expr.etype == ExpressionType.FUNCTION_EXPRESSION:
+                num_projected_columns += len(expr.output_objs)
+            else:
+                raise BinderError(f"Unsupported expression type {expr.etype}.")
 
-            binded_col_list = []
-            idx = 0
-            for expr in node.query.target_list:
-                output_objs = (
-                    [(expr.col_name, expr.col_object)]
-                    if expr.etype == ExpressionType.TUPLE_VALUE
-                    else zip(expr.projection_columns, expr.output_objs)
-                )
-                for col_name, output_obj in output_objs:
-                    binded_col_list.append(
-                        ColumnDefinition(
-                            col_name,
-                            output_obj.type,
-                            output_obj.array_type,
-                            output_obj.array_dimensions,
-                        )
+        binded_col_list = []
+        idx = 0
+        for expr in node.query.target_list:
+            output_objs = (
+                [(expr.col_name, expr.col_object)]
+                if expr.etype == ExpressionType.TUPLE_VALUE
+                else zip(expr.projection_columns, expr.output_objs)
+            )
+            for col_name, output_obj in output_objs:
+                binded_col_list.append(
+                    ColumnDefinition(
+                        col_name,
+                        output_obj.type,
+                        output_obj.array_type,
+                        output_obj.array_dimensions,
                     )
-                    idx += 1
-            node.column_list = binded_col_list
+                )
+                idx += 1
+        node.column_list = binded_col_list
 
     @bind.register(CreateMaterializedViewStatement)
     def _bind_create_mat_statement(self, node: CreateMaterializedViewStatement):
@@ -194,13 +193,12 @@ class StatementBinder:
             elif expr.etype == ExpressionType.FUNCTION_EXPRESSION:
                 num_projected_columns += len(expr.output_objs)
             else:
-                raise BinderError("Unsupported expression type {}.".format(expr.etype))
+                raise BinderError(f"Unsupported expression type {expr.etype}.")
 
-        assert (
-            len(node.col_list) == 0 or len(node.col_list) == num_projected_columns
-        ), "Projected columns mismatch, expected {} found {}.".format(
-            len(node.col_list), num_projected_columns
-        )
+        assert len(node.col_list) in [
+            0,
+            num_projected_columns,
+        ], f"Projected columns mismatch, expected {len(node.col_list)} found {num_projected_columns}."
         binded_col_list = []
         idx = 0
         for expr in node.query.target_list:
@@ -257,7 +255,7 @@ class StatementBinder:
             self.bind(func_expr)
             output_cols = []
             for obj, alias in zip(func_expr.output_objs, func_expr.alias.col_names):
-                col_alias = "{}.{}".format(func_expr.alias.alias_name, alias)
+                col_alias = f"{func_expr.alias.alias_name}.{alias}"
                 alias_obj = TupleValueExpression(
                     col_name=alias,
                     table_alias=func_expr.alias.alias_name,
@@ -281,7 +279,7 @@ class StatementBinder:
             self._binder_context.enable_audio_retrieval()
         if node.col_name == VideoColumnName.data:
             self._binder_context.enable_video_retrieval()
-        node.col_alias = "{}.{}".format(table_alias, node.col_name.lower())
+        node.col_alias = f"{table_alias}.{node.col_name.lower()}"
         node.col_object = col_obj
 
     @bind.register(FunctionExpression)

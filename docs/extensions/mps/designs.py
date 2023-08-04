@@ -90,10 +90,7 @@ def citation_sub(m):
     if 'organization' in groups:
         fmt += ' {organization}.'
     fmt += ' {date}.'
-    if 'url' in groups:
-        fmt += ' "`{title} <{url}>`__".'
-    else:
-        fmt += ' "{title}".'
+    fmt += ' "`{title} <{url}>`__".' if 'url' in groups else ' "{title}".'
     return fmt.format(**groups)
 
 
@@ -114,10 +111,7 @@ def index_sub(m):
 
 def convert_file(name, source, dest):
     s = open(source, 'rb').read().decode('utf-8')
-    # We want the index directive to go right at the start, so that it leads
-    # to the whole document.
-    m = index.search(s)
-    if m:
+    if m := index.search(s):
         s = index_sub(m) + '.. _design-{0}:\n\n'.format(name) + s
     s = mode.sub(r'', s)
     s = prefix.sub(r'.. mps:prefix:: \1', s)
@@ -162,9 +156,9 @@ def convert_updated(app):
         name = os.path.splitext(os.path.basename(design))[0]
         if name == 'index':
             continue
-        converted = 'source/design/%s.rst' % name
+        converted = f'source/design/{name}.rst'
         if newer(design, converted):
-            app.info('converting design %s' % name)
+            app.info(f'converting design {name}')
             convert_file(name, design, converted)
     for diagram in glob.iglob('../design/*.svg'):
         target = os.path.join('source/design/', os.path.basename(diagram))

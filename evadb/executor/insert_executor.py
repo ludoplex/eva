@@ -53,6 +53,4 @@ class InsertExecutor(AbstractExecutor):
         storage_engine = StorageEngine.factory(self.db, table_catalog_entry)
         storage_engine.write(table_catalog_entry, batch)
 
-        yield Batch(
-            pd.DataFrame([f"Number of rows loaded: {str(len(values_to_insert))}"])
-        )
+        yield Batch(pd.DataFrame([f"Number of rows loaded: {len(values_to_insert)}"]))

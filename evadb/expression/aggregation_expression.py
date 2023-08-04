@@ -86,16 +86,11 @@ class AggregationExpression(AbstractExpression):
             raise NotImplementedError
 
     def signature(self) -> str:
-        child_sigs = []
-        for child in self.children:
-            child_sigs.append(child.signature())
+        child_sigs = [child.signature() for child in self.children]
         return f"{self.get_symbol().lower()}({','.join(child_sigs)})"
 
     def __str__(self) -> str:
-        expr_str = ""
-        if self.etype:
-            expr_str = f"{str(self.get_symbol())}()"
-        return expr_str
+        return f"{str(self.get_symbol())}()" if self.etype else ""
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)

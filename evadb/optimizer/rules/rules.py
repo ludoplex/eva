@@ -170,15 +170,13 @@ class EmbedSampleIntoGet(Rule):
     def check(self, before: LogicalSample, context: OptimizerContext):
         # System supports sample pushdown only while reading video data
         lget: LogicalGet = before.children[0]
-        if lget.table_obj.table_type == TableType.VIDEO_DATA:
-            return True
-        return False
+        return lget.table_obj.table_type == TableType.VIDEO_DATA
 
     def apply(self, before: LogicalSample, context: OptimizerContext):
         sample_freq = before.sample_freq.value
         sample_type = before.sample_type.value.value if before.sample_type else None
         lget: LogicalGet = before.children[0]
-        new_get_opr = LogicalGet(
+        yield LogicalGet(
             lget.video,
             lget.table_obj,
             alias=lget.alias,
@@ -188,7 +186,6 @@ class EmbedSampleIntoGet(Rule):
             sampling_type=sample_type,
             children=lget.children,
         )
-        yield new_get_opr
 
 
 class CacheFunctionExpressionInProject(Rule):
@@ -209,16 +206,13 @@ class CacheFunctionExpressionInProject(Rule):
                     filter(lambda expr: check_expr_validity_for_cache(expr), func_exprs)
                 )
 
-        if len(valid_exprs) > 0:
-            return True
-        return False
+        return bool(valid_exprs)
 
     def apply(self, before: LogicalProject, context: OptimizerContext):
         new_target_list = [expr.copy() for expr in before.target_list]
         for expr in new_target_list:
             enable_cache_on_expression_tree(context, expr)
-        after = LogicalProject(target_list=new_target_list, children=before.children)
-        yield after
+        yield LogicalProject(target_list=new_target_list, children=before.children)
 
 
 class CacheFunctionExpressionInFilter(Rule):
@@ -233,13 +227,13 @@ class CacheFunctionExpressionInFilter(Rule):
     def check(self, before: LogicalFilter, context: OptimizerContext):
         func_exprs = list(before.predicate.find_all(FunctionExpression))
 
-        valid_exprs = list(
-            filter(lambda expr: check_expr_validity_for_cache(expr), func_exprs)
+        return bool(
+            valid_exprs := list(
+                filter(
+                    lambda expr: check_expr_validity_for_cache(expr), func_exprs
+                )
+            )
         )
-
-        if len(valid_exprs) > 0:
-            return True
-        return False
 
     def apply(self, before: LogicalFilter, context: OptimizerContext):
         # there could be 2^n different combinations with enable and disable option
@@ -247,10 +241,7 @@ class CacheFunctionExpressionInFilter(Rule):
         # cache is enabled for all eligible function expressions
         after_predicate = before.predicate.copy()
         enable_cache_on_expression_tree(context, after_predicate)
-        after_operator = LogicalFilter(
-            predicate=after_predicate, children=before.children
-        )
-        yield after_operator
+        yield LogicalFilter(predicate=after_predicate, children=before.children)
 
 
 class CacheFunctionExpressionInApply(Rule):
@@ -269,11 +260,9 @@ class CacheFunctionExpressionInApply(Rule):
         if expr.has_cache() or expr.name not in CACHEABLE_UDFS:
             return False
         # we do not support caching function expression instances with multiple arguments or nested function expressions
-        if len(expr.children) > 1 or not isinstance(
+        return len(expr.children) <= 1 and isinstance(
             expr.children[0], TupleValueExpression
-        ):
-            return False
-        return True
+        )
 
     def apply(self, before: LogicalApplyAndMerge, context: OptimizerContext):
         # todo: this will create a catalog entry even in the case of explain command
@@ -468,9 +457,7 @@ class XformExtractObjectToLinearFlow(Rule):
         return Promise.XFORM_EXTRACT_OBJECT_TO_LINEAR_FLOW
 
     def check(self, before: LogicalJoin, context: OptimizerContext):
-        if before.join_type == JoinType.LATERAL_JOIN:
-            return True
-        return False
+        return before.join_type == JoinType.LATERAL_JOIN
 
     def apply(self, before: LogicalJoin, context: OptimizerContext):
         A: Dummy = before.children[0]
@@ -534,10 +521,7 @@ class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
 
         # Check if predicate exists on table.
         def _exists_predicate(opr):
-            if isinstance(opr, LogicalGet):
-                return opr.predicate is not None
-            # LogicalFilter
-            return True
+            return opr.predicate is not None if isinstance(opr, LogicalGet) else True
 
         if _exists_predicate(sub_tree_root.opr):
             return
@@ -703,8 +687,7 @@ class LogicalCreateToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalCreate, context: OptimizerContext):
-        after = CreatePlan(before.video, before.column_list, before.if_not_exists)
-        yield after
+        yield CreatePlan(before.video, before.column_list, before.if_not_exists)
 
 
 class LogicalCreateFromSelectToPhysical(Rule):
@@ -738,8 +721,7 @@ class LogicalRenameToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalRename, context: OptimizerContext):
-        after = RenamePlan(before.old_table_ref, before.new_name)
-        yield after
+        yield RenamePlan(before.old_table_ref, before.new_name)
 
 
 class LogicalDropToPhysical(Rule):
@@ -754,8 +736,7 @@ class LogicalDropToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalDrop, context: OptimizerContext):
-        after = DropPlan(before.table_infos, before.if_exists)
-        yield after
+        yield DropPlan(before.table_infos, before.if_exists)
 
 
 class LogicalCreateUDFToPhysical(Rule):
@@ -770,7 +751,7 @@ class LogicalCreateUDFToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalCreateUDF, context: OptimizerContext):
-        after = CreateUDFPlan(
+        yield CreateUDFPlan(
             before.name,
             before.if_not_exists,
             before.inputs,
@@ -779,7 +760,6 @@ class LogicalCreateUDFToPhysical(Rule):
             before.udf_type,
             before.metadata,
         )
-        yield after
 
 
 class LogicalCreateIndexToVectorIndex(Rule):
@@ -794,14 +774,13 @@ class LogicalCreateIndexToVectorIndex(Rule):
         return True
 
     def apply(self, before: LogicalCreateIndex, context: OptimizerContext):
-        after = CreateIndexPlan(
+        yield CreateIndexPlan(
             before.name,
             before.table_ref,
             before.col_list,
             before.vector_store_type,
             before.udf_func,
         )
-        yield after
 
 
 class LogicalDropUDFToPhysical(Rule):
@@ -816,8 +795,7 @@ class LogicalDropUDFToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalDropUDF, context: OptimizerContext):
-        after = DropUDFPlan(before.name, before.if_exists)
-        yield after
+        yield DropUDFPlan(before.name, before.if_exists)
 
 
 class LogicalInsertToPhysical(Rule):
@@ -832,8 +810,7 @@ class LogicalInsertToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalInsert, context: OptimizerContext):
-        after = InsertPlan(before.table, before.column_list, before.value_list)
-        yield after
+        yield InsertPlan(before.table, before.column_list, before.value_list)
 
 
 class LogicalDeleteToPhysical(Rule):
@@ -848,8 +825,7 @@ class LogicalDeleteToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalDelete, context: OptimizerContext):
-        after = DeletePlan(before.table_ref, before.where_clause)
-        yield after
+        yield DeletePlan(before.table_ref, before.where_clause)
 
 
 class LogicalLoadToPhysical(Rule):
@@ -864,13 +840,12 @@ class LogicalLoadToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalLoadData, context: OptimizerContext):
-        after = LoadDataPlan(
+        yield LoadDataPlan(
             before.table_info,
             before.path,
             before.column_list,
             before.file_options,
         )
-        yield after
 
 
 class LogicalGetToSeqScan(Rule):
@@ -1009,8 +984,7 @@ class LogicalFunctionScanToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalFunctionScan, context: OptimizerContext):
-        after = FunctionScanPlan(before.func_expr, before.do_unnest)
-        yield after
+        yield FunctionScanPlan(before.func_expr, before.do_unnest)
 
 
 class LogicalLateralJoinToPhysical(Rule):
@@ -1053,13 +1027,12 @@ class LogicalJoinToPhysicalHashJoin(Rule):
             return False
         j_child: FunctionExpression = before.join_predicate.children[0]
 
-        if isinstance(j_child, FunctionExpression):
-            if j_child.name.startswith("FuzzDistance"):
-                return before.join_type == JoinType.INNER_JOIN and (
-                    not (j_child) or not (j_child.name.startswith("FuzzDistance"))
-                )
-        else:
+        if not isinstance(j_child, FunctionExpression):
             return before.join_type == JoinType.INNER_JOIN
+        if j_child.name.startswith("FuzzDistance"):
+            return before.join_type == JoinType.INNER_JOIN and (
+                not (j_child) or not (j_child.name.startswith("FuzzDistance"))
+            )
 
     def apply(self, join_node: LogicalJoin, context: OptimizerContext):
         #          HashJoinPlan                       HashJoinProbePlan
@@ -1196,8 +1169,7 @@ class LogicalShowToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalShow, context: OptimizerContext):
-        after = ShowInfoPlan(before.show_type)
-        yield after
+        yield ShowInfoPlan(before.show_type)
 
 
 class LogicalExplainToPhysical(Rule):
@@ -1329,7 +1301,7 @@ class LogicalProjectToRayPhysical(Rule):
         project_plan = ProjectPlan(before.target_list)
         # Check whether the projection contains a UDF
         if before.target_list is None or not any(
-            [isinstance(expr, FunctionExpression) for expr in before.target_list]
+            isinstance(expr, FunctionExpression) for expr in before.target_list
         ):
             for child in before.children:
                 project_plan.append_child(child)

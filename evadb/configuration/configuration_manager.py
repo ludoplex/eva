@@ -26,11 +26,10 @@ class ConfigurationManager(object):
         self._config_obj = self._create_if_not_exists()
 
     def _create_if_not_exists(self):
-        config_obj = bootstrap_environment(
+        return bootstrap_environment(
             eva_db_dir=Path(self._eva_db_dir),
             eva_installation_dir=Path(EVA_INSTALLATION_DIR),
         )
-        return config_obj
 
     def _get(self, category: str, key: str) -> Any:
         """Retrieve a configuration value based on the category and key.

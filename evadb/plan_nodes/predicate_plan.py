@@ -29,7 +29,7 @@ class PredicatePlan(AbstractPlan):
         super().__init__(PlanOprType.PREDICATE_FILTER)
 
     def __str__(self):
-        return "PredicatePlan(predicate={})".format(self.predicate)
+        return f"PredicatePlan(predicate={self.predicate})"
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.predicate))

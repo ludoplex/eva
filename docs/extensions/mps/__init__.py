@@ -84,7 +84,7 @@ def mps_tag_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
         return [], [inliner.document.reporter.error
                     ('missing argument for mps:tag', line=lineno)]
     targetnode = nodes.target('', '', ids=[targetid])
-    tag = '.{}:'.format(text)
+    tag = f'.{text}:'
     refnode = nodes.reference('', '', refid=targetid, classes=['mpstag'],
                               *[nodes.Text(tag)])
     return [targetnode, refnode], []
@@ -293,7 +293,7 @@ class GlossaryTransform(transforms.Transform):
         # cross-references to glossary entries.
         for target in self.document.traverse(addnodes.pending_xref):
             if target['reftype'] == 'term':
-                ids = self.xref_ids['term-{}'.format(target['reftarget'])]
+                ids = self.xref_ids[f"term-{target['reftarget']}"]
                 ids.append((target.source, target.line))
                 if len(target) == 1 and isinstance(target[0], nodes.emphasis):
                     target[0][:] = list(self.superscript_children(target[0]))
@@ -311,7 +311,7 @@ class GlossaryTransform(transforms.Transform):
 
         # Add cross-reference targets for plurals.
         objects = self.document.settings.env.domaindata['std']['objects']
-        endings = [(l, l + 's') for l in 'abcedfghijklmnopqrtuvwxz']
+        endings = [(l, f'{l}s') for l in 'abcedfghijklmnopqrtuvwxz']
         endings.extend([
             ('ss', 'sses'),
             ('ing', 'ed'),
@@ -322,10 +322,9 @@ class GlossaryTransform(transforms.Transform):
         for (name, fullname), value in list(objects.items()):
             if name != 'term':
                 continue
-            m = self.sense_re.match(fullname)
-            if m:
+            if m := self.sense_re.match(fullname):
                 old_fullname = m.group(1)
-                sense = ' ' + m.group(2)
+                sense = f' {m.group(2)}'
             else:
                 old_fullname = fullname
                 sense = ''
@@ -334,9 +333,7 @@ class GlossaryTransform(transforms.Transform):
             for old_ending, new_ending in endings:
                 if not old_fullname.endswith(old_ending):
                     continue
-                new_fullname = '{}{}{}'.format(
-                    old_fullname[:len(old_fullname) - len(old_ending)],
-                    new_ending, sense)
+                new_fullname = f'{old_fullname[:len(old_fullname) - len(old_ending)]}{new_ending}{sense}'
                 new_key = name, new_fullname
                 if new_key not in objects:
                     objects[new_key] = value
@@ -352,8 +349,7 @@ class GlossaryTransform(transforms.Transform):
         if not exception:
             for i in cls.see_only_ids:
                 for doc, line in cls.xref_ids[i]:
-                    print('{}:{}: WARNING: cross-reference to {}.'
-                          .format(doc, line, i))
+                    print(f'{doc}:{line}: WARNING: cross-reference to {i}.')
 
 
 def setup(app):

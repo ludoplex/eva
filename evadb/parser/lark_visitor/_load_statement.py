@@ -25,9 +25,7 @@ class Load:
         file_format = self.visit(tree.children[1])
 
         # Set default for file_format as Video
-        file_options = {}
-        file_options["file_format"] = file_format
-
+        file_options = {"file_format": file_format}
         file_path = self.visit(tree.children[2]).value
         table = self.visit(tree.children[4])
 
@@ -38,8 +36,7 @@ class Load:
                 if child.data == "uid_list":
                     column_list = self.visit(child)
 
-        stmt = LoadDataStatement(table, file_path, column_list, file_options)
-        return stmt
+        return LoadDataStatement(table, file_path, column_list, file_options)
 
     def file_format(self, tree):
         file_format = None
@@ -59,7 +56,5 @@ class Load:
         return file_format
 
     def file_options(self, tree):
-        file_options = {}
         file_format = self.visit(tree.children[1])
-        file_options["file_format"] = file_format
-        return file_options
+        return {"file_format": file_format}

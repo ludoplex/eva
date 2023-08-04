@@ -108,9 +108,8 @@ class EVADBCursor(object):
     def _multiline_query_transformation(self, query: str) -> str:
         query = query.replace("\n", " ")
         query = query.lstrip()
-        query = query.rstrip(" ;")
-        query += ";"
-        logger.debug("Query: " + query)
+        query = query.rstrip(" ;") + ";"
+        logger.debug(f"Query: {query}")
         return query
 
     def stop_query(self):
@@ -122,7 +121,7 @@ class EVADBCursor(object):
         Sync function calls should not be used in an async environment.
         """
         try:
-            func = object.__getattribute__(self, "%s_async" % name)
+            func = object.__getattribute__(self, f"{name}_async")
         except Exception as e:
             raise e
 
@@ -300,11 +299,8 @@ def connect(
 
 async def get_connection(host: str, port: int) -> EVADBConnection:
     reader, writer = await asyncio.open_connection(host, port)
-    # no db required for remote connection
-    connection = EVADBConnection(None, reader, writer)
-    return connection
+    return EVADBConnection(None, reader, writer)
 
 
 def connect_remote(host: str, port: int) -> EVADBConnection:
-    connection = asyncio.run(get_connection(host, port))
-    return connection
+    return asyncio.run(get_connection(host, port))

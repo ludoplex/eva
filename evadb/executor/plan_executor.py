@@ -76,10 +76,8 @@ class PlanExecutor:
         Returns:
             AbstractExecutor -- Compiled Execution tree
         """
-        root = None
         if plan is None:
-            return root
-
+            return None
         # Get plan node type
         plan_opr_type = plan.opr_type
 

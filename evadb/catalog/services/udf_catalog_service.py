@@ -50,10 +50,9 @@ class UdfCatalogService(BaseService):
             name (str): name to be searched
         """
 
-        udf_obj = self.session.execute(
+        if udf_obj := self.session.execute(
             select(self.model).filter(self.model._name == name)
-        ).scalar_one_or_none()
-        if udf_obj:
+        ).scalar_one_or_none():
             return udf_obj.as_dataclass()
         return None
 
@@ -65,12 +64,12 @@ class UdfCatalogService(BaseService):
             id (int): id to be searched
         """
 
-        udf_obj = self.session.execute(
+        if udf_obj := self.session.execute(
             select(self.model).filter(self.model._row_id == id)
-        ).scalar_one_or_none()
-        if udf_obj:
+        ).scalar_one_or_none():
             return udf_obj if return_alchemy else udf_obj.as_dataclass()
-        return udf_obj
+        else:
+            return udf_obj
 
     def delete_entry_by_name(self, name: str):
         """Delete a udf entry from the catalog UdfCatalog

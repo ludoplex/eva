@@ -158,12 +158,11 @@ class Batch:
         elif isinstance(indices, int):
             return self._get_frames_from_indices([indices])
         else:
-            raise TypeError("Invalid argument type: {}".format(type(indices)))
+            raise TypeError(f"Invalid argument type: {type(indices)}")
 
     def _get_frames_from_indices(self, required_frame_ids):
         new_frames = self._frames.iloc[required_frame_ids, :]
-        new_batch = Batch(new_frames)
-        return new_batch
+        return Batch(new_frames)
 
     def apply_function_expression(self, expr: Callable) -> Batch:
         """
@@ -201,7 +200,7 @@ class Batch:
         for column in by:
             assert (
                 column in self._frames.columns
-            ), "Can not orderby non-projected column: {}".format(column)
+            ), f"Can not orderby non-projected column: {column}"
 
         self._frames.sort_values(
             by, ascending=sort_type, ignore_index=True, inplace=True
@@ -241,7 +240,7 @@ class Batch:
         cols = cols or []
         verified_cols = [c for c in cols if c in self._frames]
         unknown_cols = list(set(cols) - set(verified_cols))
-        assert len(unknown_cols) == 0, unknown_cols
+        assert not unknown_cols, unknown_cols
         return Batch(self._frames[verified_cols])
 
     @classmethod
@@ -263,7 +262,7 @@ class Batch:
             method="ffill"
         )
         if new_frames.columns.duplicated().any():
-            logger.warn("Duplicated column name detected {}".format(new_frames))
+            logger.warn(f"Duplicated column name detected {new_frames}")
         return Batch(new_frames)
 
     def __add__(self, other: Batch) -> Batch:
@@ -281,10 +280,7 @@ class Batch:
         # Appending a empty dataframe with column name leads to NaN row.
         if self.empty():
             return other
-        if other.empty():
-            return self
-
-        return Batch.concat([self, other], copy=False)
+        return self if other.empty() else Batch.concat([self, other], copy=False)
 
     @classmethod
     def concat(cls, batch_list: Iterable[Batch], copy=True) -> Batch:
@@ -294,8 +290,8 @@ class Batch:
 
         # pd.concat will convert generator into list, so it does not hurt
         # if we convert ourselves.
-        frame_list = list([batch.frames for batch in batch_list])
-        if len(frame_list) == 0:
+        frame_list = [batch.frames for batch in batch_list]
+        if not frame_list:
             return Batch()
         frame = pd.concat(frame_list, ignore_index=True, copy=copy)
 
@@ -411,17 +407,14 @@ class Batch:
                 )
                 raise RuntimeError(err_msg)
             new_col_names = [
-                "{}.{}".format(alias.alias_name, col_name)
-                for col_name in alias.col_names
+                f"{alias.alias_name}.{col_name}" for col_name in alias.col_names
             ]
         else:
             for col_name in self.columns:
                 if "." in str(col_name):
-                    new_col_names.append(
-                        "{}.{}".format(alias.alias_name, str(col_name).split(".")[1])
-                    )
+                    new_col_names.append(f'{alias.alias_name}.{str(col_name).split(".")[1]}')
                 else:
-                    new_col_names.append("{}.{}".format(alias.alias_name, col_name))
+                    new_col_names.append(f"{alias.alias_name}.{col_name}")
 
         self._frames.columns = new_col_names
 

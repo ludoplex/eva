@@ -33,5 +33,4 @@ class Delete:
                 elif child.data == "where_expr":
                     where_clause = self.visit(child)
 
-        delete_stmt = DeleteTableStatement(table_ref, where_clause)
-        return delete_stmt
+        return DeleteTableStatement(table_ref, where_clause)

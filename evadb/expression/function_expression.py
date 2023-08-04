@@ -82,8 +82,9 @@ class FunctionExpression(AbstractExpression):
     def col_alias(self):
         col_alias_list = []
         if self.alias is not None:
-            for col in self.alias.col_names:
-                col_alias_list.append("{}.{}".format(self.alias.alias_name, col))
+            col_alias_list.extend(
+                f"{self.alias.alias_name}.{col}" for col in self.alias.col_names
+            )
         return col_alias_list
 
     @property
@@ -152,12 +153,8 @@ class FunctionExpression(AbstractExpression):
         Returns:
             str: signature string
         """
-        child_sigs = []
-        for child in self.children:
-            child_sigs.append(child.signature())
-
-        func_sig = f"{self.name}[{self.udf_obj.row_id}]({','.join(child_sigs)})"
-        return func_sig
+        child_sigs = [child.signature() for child in self.children]
+        return f"{self.name}[{self.udf_obj.row_id}]({','.join(child_sigs)})"
 
     def _gpu_enabled_function(self):
         if self._function_instance is None:
@@ -231,8 +228,7 @@ class FunctionExpression(AbstractExpression):
 
     def __str__(self) -> str:
         args = [str(child) for child in self.children]
-        expr_str = f"{self.name}({','.join(args)})"
-        return expr_str
+        return f"{self.name}({','.join(args)})"
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)

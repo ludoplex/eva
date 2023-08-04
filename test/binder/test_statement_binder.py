@@ -35,7 +35,7 @@ class StatementBinderTests(unittest.TestCase):
             tve = MagicMock()
             tve.col_name = "col_name"
             binder._bind_tuple_expr(tve)
-            col_alias = "{}.{}".format("table_alias", "col_name")
+            col_alias = 'table_alias.col_name'
             mock.assert_called_once()
             self.assertEqual(tve.col_object, "col_obj")
             self.assertEqual(tve.col_alias, col_alias)
@@ -181,7 +181,7 @@ class StatementBinderTests(unittest.TestCase):
             udf_obj.impl_file_path, udf_obj.name
         )
         self.assertEqual(func_expr.output_objs, [obj1])
-        print(str(func_expr.alias))
+        print(func_expr.alias)
         self.assertEqual(
             func_expr.alias,
             Alias("func_expr", ["out1"]),

@@ -78,18 +78,15 @@ class ExchangeExecutor(AbstractExecutor):
             input_queue,
         )
 
-        # Parallel the inner executor.
-        ray_parallel_task_list = []
-        for i in range(self.parallelism):
-            ray_parallel_task_list.append(
-                ray_parallel.remote(
-                    self.ray_parallel_env_conf_dict[i],
-                    self.inner_executor,
-                    input_queue,
-                    output_queue,
-                )
+        ray_parallel_task_list = [
+            ray_parallel.remote(
+                self.ray_parallel_env_conf_dict[i],
+                self.inner_executor,
+                input_queue,
+                output_queue,
             )
-
+            for i in range(self.parallelism)
+        ]
         ray_wait_and_alert.remote([ray_pull_task], input_queue)
         ray_wait_and_alert.remote(ray_parallel_task_list, output_queue)
 

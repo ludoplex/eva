@@ -77,6 +77,6 @@ class IndexCatalogService(BaseService):
                 os.remove(index_metadata.save_file_path)
             index_obj.delete(self.session)
         except Exception:
-            logger.exception("Delete index failed for name {}".format(name))
+            logger.exception(f"Delete index failed for name {name}")
             return False
         return True

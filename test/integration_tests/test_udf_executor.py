@@ -115,7 +115,7 @@ class UDFExecutorTest(unittest.TestCase):
                 "dummyobjectdetector.label": np.array(["bicycle"]),
             }
             for i in range(NUM_FRAMES)
-            if i % 2 + 1 == 2
+            if i % 2 == 1
         ]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         expected_batch.sort()
@@ -158,7 +158,7 @@ class UDFExecutorTest(unittest.TestCase):
 
         # Try to create UDF if not exists
         actual = execute_query_fetch_all(
-            self.evadb, create_udf_query.format("IF NOT EXISTS " + udf_name)
+            self.evadb, create_udf_query.format(f"IF NOT EXISTS {udf_name}")
         )
         expected = Batch(
             pd.DataFrame([f"UDF {udf_name} already exists, nothing added."])

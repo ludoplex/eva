@@ -34,7 +34,7 @@ class OCRExtractor(AbstractClassifierUDF, GPUCompatible):
         :param device:
         :return:
         """
-        self.model = easyocr.Reader(["en"], gpu="cuda:{}".format(device), verbose=False)
+        self.model = easyocr.Reader(["en"], gpu=f"cuda:{device}", verbose=False)
         return self
 
     def setup(self, threshold=0.85):

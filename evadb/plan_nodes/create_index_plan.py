@@ -68,7 +68,7 @@ class CreateIndexPlan(AbstractPlan):
             self._table_ref,
             tuple(self._col_list),
             self._vector_store_type,
-            "" if not self._udf_func else "udf_func={}".format(self._udf_func),
+            "" if not self._udf_func else f"udf_func={self._udf_func}",
         )
 
     def __hash__(self) -> int:

@@ -53,8 +53,7 @@ def execute_query_fetch_all(
     """
     Execute the query and fetch all results into one Batch object.
     """
-    output = execute_query(evadb, query, report_time=True, **kwargs)
-    if output:
+    if output := execute_query(evadb, query, report_time=True, **kwargs):
         batch_list = list(output)
         return Batch.concat(batch_list, copy=False)
 
@@ -66,7 +65,7 @@ async def handle_request(evadb: EVADatabase, client_writer, request_message):
     If user inputs 'quit' stops the event loop
     otherwise just echoes user input
     """
-    logger.debug("Receive request: --|" + str(request_message) + "|--")
+    logger.debug(f"Receive request: --|{str(request_message)}|--")
 
     error = False
     error_msg = None
